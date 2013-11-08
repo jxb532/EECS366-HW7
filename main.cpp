@@ -256,6 +256,21 @@ void	keyboard(unsigned char key, int x, int y)
 		fb->Resize(fb->GetHeight()*2, fb->GetWidth()*2);
 		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
 		break;
+	case ']':
+		// TODO: move the image plane farther from the origin along the z axis
+		break;
+	case '[':
+		// TODO: move the image plane closer to the origin along the z axis
+		break;
+	case '.':
+		// TODO: increase the x,y dimensions of the image plane
+		break;
+	case ',':
+		// TODO: decrease the x,y dimensions of the image plane
+		break;
+	case 'r':
+		// TODO redraw the image
+		break;
     default:
 		break;
     }
