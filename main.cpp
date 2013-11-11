@@ -207,20 +207,21 @@ void	display(void)
 		glLightfv(LIGHT[i], values[i][0] == 0 ? GL_SPOT_DIRECTION : GL_POSITION, position);
 		glLightfv(LIGHT[i], GL_DIFFUSE, color);
 		glLightfv(LIGHT[i], GL_SPECULAR, color);
-		// glLightfv(LIGHT[i], GL_AMBIENT, color);
 		glEnable(LIGHT[i]);
 	}
 
 	// Add the spheres.
 	for (int i = lights; i < lights + spheres; i++) {
 		glLoadIdentity();
-		GLUquadric* quad = gluNewQuadric();
 		glTranslatef(values[i][0], values[i][1], values[i][2]);
+		GLUquadric* quad = gluNewQuadric();
 		gluSphere(quad, values[i][3], SLICES, STACKS);
+		// TODO: Apply material elements
 		// TODO: delete quad?
 	}
 	
 	// Add the meshes.
+	// TODO: Add the meshes.
 
    
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
