@@ -15,13 +15,16 @@
 
 #define ON 1
 #define OFF 0
+#define Z_STEP 1;
+#define XY_STEP 1;
 
 using namespace std;
 
 
 // Global variables
 int window_width, window_height;    // Window dimensions
-
+int imagePlaneZ = -8;
+int imagePlaneXY = 5;
 const int INITIAL_RES = 400;
 
 FrameBuffer* fb;
@@ -258,15 +261,33 @@ void	keyboard(unsigned char key, int x, int y)
 		break;
 	case ']':
 		// TODO: move the image plane farther from the origin along the z axis
+		imagePlaneZ -= Z_STEP;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
 		break;
 	case '[':
 		// TODO: move the image plane closer to the origin along the z axis
+		imagePlaneZ += Z_STEP;
+		imagePlaneZ = imagePlaneZ > 0 ? 0 : imagePlaneZ;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
 		break;
 	case '.':
 		// TODO: increase the x,y dimensions of the image plane
+		imagePlaneXY += XY_STEP;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
 		break;
 	case ',':
 		// TODO: decrease the x,y dimensions of the image plane
+		imagePlaneXY -= XY_STEP;
+		imagePlaneXY = imagePlaneXY < 1 ? 1 : imagePlaneXY;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
 		break;
 	case 'r':
 		// TODO redraw the image
@@ -302,7 +323,7 @@ int main(int argc, char* argv[])
     // Initialize GL
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0,10,0,10,-10000,10000);
+	glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glEnable(GL_DEPTH_TEST);
@@ -316,7 +337,7 @@ int main(int argc, char* argv[])
 }
 
 void shootRay(/*rayStructure*/) {
-	// if ray intersects and object
+	// if ray intersects an object
 		//get normal at intersection point
 		//calculate local intensity (I_local)
 		// decrement current depth of trace
