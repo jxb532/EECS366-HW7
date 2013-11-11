@@ -314,3 +314,32 @@ int main(int argc, char* argv[])
     glutMainLoop();
     return 0;        
 }
+
+void shootRay(/*rayStructure*/) {
+	// if ray intersects and object
+		//get normal at intersection point
+		//calculate local intensity (I_local)
+		// decrement current depth of trace
+		// if depth of trace > 0
+			// if object is a reflecting object
+				// calculate reflectin vector and include in the ray structure
+				// Ray Origin = intersection point
+				// Attenuate the ray (multiply the current k_rg by its value at the previous intersection)
+				// shootRay(reflected ray structure)
+				// if reflected ray intersects an object
+					// combine colors (k_rg I) with I_local
+			// if object is a refracting object
+				// if ray is entering object
+					// accumulate the refractive index
+					// increment number of objects that the ray is currently inside
+					// calculate refraction vector and include in refracted ray structure
+				// else
+					// de-accumulate refractive index
+					// decrement number of objects that the ray is currently inside
+					// calculate refraction vector and include in refracted ray structure
+				// Ray Origin = intersection point
+				// Attenuate ray (k_tg)
+				// shootRay(refracted ray structure)
+				// if refracted ray intersects an object
+					// combine colors (k_tg I) with I_local
+}
