@@ -343,3 +343,51 @@ void shootRay(/*rayStructure*/) {
 				// if refracted ray intersects an object
 					// combine colors (k_tg I) with I_local
 }
+
+bool parseLayoutFile(char* path, int &lights, int &spheres, int &meshes, float** &values, char** &meshPaths) {
+	ifstream fp(path, ios::in);
+	if(!fp || !fp.is_open()) {
+		cout<< "Failed to load " << path << endl;
+		return false;
+	}
+
+	// Get the basic information from the file.
+	fp >> lights >> spheres >> meshes;
+	values = new float* [lights + spheres + meshes];
+	meshPaths = new char* [meshes];
+
+	int curLight = 0;
+	int curSphere = 0;
+	int curMesh = 0;
+	char type;
+	int index, count;
+	while (!fp.eof()) {
+		fp >> type;
+		switch (type) {
+		case 'L':
+			count = 7;
+			index = curLight++;
+			break;
+		case 'S':
+			count = 20;
+			index = lights + curSphere++;
+			break;
+		case 'M':
+			fp >> meshPaths[curMesh];
+			count = 23;
+			index = lights + spheres + curMesh++;
+			break;
+		default:
+			cout << "Failed to parse " << path << endl;
+			return false;
+		}
+
+		values[index] = new float [count];
+		for (int i = 0; i < count; i++) {
+			fp >> values[index][i];
+		}
+	}
+
+	fp.close();
+	return true;
+}
