@@ -17,18 +17,14 @@
 #define OFF 0
 #define Z_STEP 1;
 #define XY_STEP 1;
+#define SLICES 100
+#define STACKS 100
 
 using namespace std;
 
 const GLenum LIGHT [] = {
-	GL_LIGHT0,
-	GL_LIGHT1,
-	GL_LIGHT2,
-	GL_LIGHT3,
-	GL_LIGHT4,
-	GL_LIGHT5,
-	GL_LIGHT6,
-	GL_LIGHT7
+	GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3,
+	GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7
 };
 
 
@@ -206,14 +202,26 @@ void	display(void)
 	glEnable(GL_LIGHTING);
 	for (int i = 0; i < 8; i++) glDisable(LIGHT[i]);
 	for (int i = 0; i < lights; i++) {
-		GLfloat color[4] = { values[i][4], values[i][5], values[i][6] };
-		GLfloat position[4] = { values[i][1], values[i][2], values[i][3] };
+		GLfloat color[4] = { values[i][4], values[i][5], values[i][6], 1 };
+		GLfloat position[4] = { values[i][1], values[i][2], values[i][3], 1 };
 		glLightfv(LIGHT[i], values[i][0] == 0 ? GL_SPOT_DIRECTION : GL_POSITION, position);
 		glLightfv(LIGHT[i], GL_DIFFUSE, color);
 		glLightfv(LIGHT[i], GL_SPECULAR, color);
 		// glLightfv(LIGHT[i], GL_AMBIENT, color);
 		glEnable(LIGHT[i]);
 	}
+
+	// Add the spheres.
+	for (int i = lights; i < lights + spheres; i++) {
+		glLoadIdentity();
+		GLUquadric* quad = gluNewQuadric();
+		glTranslatef(values[i][0], values[i][1], values[i][2]);
+		gluSphere(quad, values[i][3], SLICES, STACKS);
+		// TODO: delete quad?
+	}
+	
+	// Add the meshes.
+
    
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
