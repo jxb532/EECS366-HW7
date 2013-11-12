@@ -8,6 +8,7 @@
 #include "frame_buffer.h"
 #include "primitives.h"
 #include "color.h"
+#include "ray.h"
 #include <vector>
 
 #include <iostream>
@@ -15,8 +16,8 @@
 
 #define ON 1
 #define OFF 0
-#define Z_STEP 1;
-#define XY_STEP 1;
+#define Z_STEP 1
+#define XY_STEP 1
 
 using namespace std;
 
@@ -28,22 +29,6 @@ int imagePlaneXY = 5;
 const int INITIAL_RES = 400;
 
 FrameBuffer* fb;
-
-class point
-{
-public:
-	double x,y,z,w;
-
-	point(){ x = 0; y = 0; z = 0; w = 1;}
-	point(double xa, double ya, double za)
-	{
-		x = xa; y = ya; z = za; w = 1.0;
-	}
-	point(double xa, double ya, double za, double wa)
-	{
-		x = xa; y = ya; z = za; w = wa;
-	}
-};
 
 typedef struct _faceStruct {
   int v1,v2,v3;
@@ -188,10 +173,10 @@ void	display(void)
 
 	double w = 10/double(fb->GetWidth());
 	double h = 10/double(fb->GetHeight());
-
+	
 	Color cl;
 	glColor3f(0,0,1);
-
+	
 	glBegin(GL_QUADS);
 
 	printf("width %d, height %d\n", fb->GetWidth(), fb->GetHeight());
@@ -336,7 +321,7 @@ int main(int argc, char* argv[])
     return 0;        
 }
 
-void shootRay(/*rayStructure*/) {
+void shootRay(Ray *ray) {
 	// if ray intersects an object
 		//get normal at intersection point
 		//calculate local intensity (I_local)

@@ -21,6 +21,15 @@
     <ClCompile Include="primitives.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vector3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Ray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="color.h">
@@ -35,7 +44,16 @@
     <ClInclude Include="primitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ray.h">
+    <ClInclude Include="Vector3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Ray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DisplayObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

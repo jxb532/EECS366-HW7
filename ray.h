@@ -1,23 +1,17 @@
-#ifndef RAY_H
-#define RAY_H
-
-#include "main.cpp"
+#include "point.h"
+#include "Vector3.h"
 #include "color.h"
 
 using namespace std;
 
+#pragma once
 class Ray {
 public:
+	Ray();
+	Ray(point _origin, Vector3 _direction);
+	~Ray();
+	
 	point origin;
+	Vector3 direction;
 	Color color;
-
-	Ray(point _origin) {
-		origin = _origin;
-		color = Color(0,0,0);
-	}
-
-	~Ray() {
-		delete origin, color;
-	}
-}
-#endif
+};
