@@ -18,8 +18,15 @@
 #define OFF 0
 #define Z_STEP 1
 #define XY_STEP 1
+#define SLICES 100
+#define STACKS 100
 
 using namespace std;
+
+const GLenum LIGHT [] = {
+	GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3,
+	GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7
+};
 
 
 // Global variables
@@ -27,6 +34,9 @@ int window_width, window_height;    // Window dimensions
 int imagePlaneZ = -8;
 int imagePlaneXY = 5;
 const int INITIAL_RES = 400;
+float** values;
+char** meshPaths;
+int lights, spheres, meshes;
 
 FrameBuffer* fb;
 
@@ -168,6 +178,36 @@ void	display(void)
 {
     // Clear the background
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Load projections and viewing transforms
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	// Add the lights.
+	glEnable(GL_LIGHTING);
+	for (int i = 0; i < 8; i++) glDisable(LIGHT[i]);
+	for (int i = 0; i < lights; i++) {
+		GLfloat color[4] = { values[i][4], values[i][5], values[i][6], 1 };
+		GLfloat position[4] = { values[i][1], values[i][2], values[i][3], 1 };
+		glLightfv(LIGHT[i], values[i][0] == 0 ? GL_SPOT_DIRECTION : GL_POSITION, position);
+		glLightfv(LIGHT[i], GL_DIFFUSE, color);
+		glLightfv(LIGHT[i], GL_SPECULAR, color);
+		glEnable(LIGHT[i]);
+	}
+
+	// Add the spheres.
+	for (int i = lights; i < lights + spheres; i++) {
+		glLoadIdentity();
+		glTranslatef(values[i][0], values[i][1], values[i][2]);
+		GLUquadric* quad = gluNewQuadric();
+		gluSphere(quad, values[i][3], SLICES, STACKS);
+		// TODO: Apply material elements
+		// TODO: delete quad?
+	}
+	
+	// Add the meshes.
+	// TODO: Add the meshes.
+
    
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -350,7 +390,7 @@ void shootRay(Ray *ray) {
 					// combine colors (k_tg I) with I_local
 }
 
-bool parseLayoutFile(char* path, int &lights, int &spheres, int &meshes, float** &values, char** &meshPaths) {
+bool parseLayoutFile(char* path) {
 	ifstream fp(path, ios::in);
 	if(!fp || !fp.is_open()) {
 		cout<< "Failed to load " << path << endl;
@@ -362,6 +402,12 @@ bool parseLayoutFile(char* path, int &lights, int &spheres, int &meshes, float**
 	values = new float* [lights + spheres + meshes];
 	meshPaths = new char* [meshes];
 
+	if (lights > 8) {
+		cout << "Cannot have more than 8 lights." << endl;
+		return false;
+	}
+
+	// Read the objects.
 	int curLight = 0;
 	int curSphere = 0;
 	int curMesh = 0;
@@ -384,6 +430,11 @@ bool parseLayoutFile(char* path, int &lights, int &spheres, int &meshes, float**
 			index = lights + spheres + curMesh++;
 			break;
 		default:
+			cout << "Failed to parse " << path << endl;
+			return false;
+		}
+
+		if (curLight >= lights || curSphere || curMesh >= meshes) {
 			cout << "Failed to parse " << path << endl;
 			return false;
 		}
