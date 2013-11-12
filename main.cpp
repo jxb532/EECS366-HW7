@@ -8,7 +8,10 @@
 #include "frame_buffer.h"
 #include "primitives.h"
 #include "color.h"
-#include "ray.h"
+#include "Ray.h"
+#include "DisplayObject.h"
+#include "Light.h"
+#include "MatrixMakers.h"
 #include <vector>
 
 #include <iostream>
@@ -40,6 +43,10 @@ int lights, spheres, meshes;
 
 FrameBuffer* fb;
 
+void initObjectsAndLights();
+bool parseLayoutFile(char* path);
+void shootRay(Ray *ray);
+
 typedef struct _faceStruct {
   int v1,v2,v3;
   int n1,n2,n3;
@@ -48,6 +55,10 @@ typedef struct _faceStruct {
 int verts, faces, norms;    // Number of vertices, faces and normals in the system
 point *vertList, *normList; // Vertex and Normal Lists
 faceStruct *faceList;	    // Face List
+DisplayObject *objects;
+DisplayObject *sphereObjects;
+DisplayObject *polygonObjects;
+Light *lighting;
 
 // The mesh reader itself
 // It can read *very* simple obj files
@@ -356,6 +367,8 @@ int main(int argc, char* argv[])
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_LINE_SMOOTH);
 
+	initObjectsAndLights();
+
     // Switch to main loop
     glutMainLoop();
     return 0;        
@@ -390,6 +403,62 @@ void shootRay(Ray *ray) {
 					// combine colors (k_tg I) with I_local
 }
 
+void initObjectsAndLights() {
+	// TODO move these guys into the main directory
+	parseLayoutFile("samples/redsphere.rtl");
+
+	//TODO grab the filename as a string rather than a float
+	char* meshFile = "teapot.obj";
+	//values[lights + spheres][0];
+	meshReader(meshFile, 1.0);
+
+	lighting = static_cast<Light*>( ::operator new ( sizeof Light * lights ) );
+
+	// Add the lights.
+	int index = 0;
+	for (int i = 0; i < lights; i++) {
+		new (&lighting[index++]) Light((int)values[i][0], &values[i][1], &values[i][4]);
+	}
+
+	// TODO make sure this works
+	sphereObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Sphere * spheres ) );
+
+	// Add the spheres.
+	index = 0;
+	for (int i = lights; i < lights + spheres; i++) {
+		new (&sphereObjects[index++]) Sphere(&values[i][0], values[i][3], &values[i][4], &values[i][7], &values[i][10], values[i][13], values[i][14], values[i][15], values[i][16], values[i][17], values[i][18], values[i][19]);
+	}
+	
+
+	polygonObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Polygon * spheres ) );
+
+	// Add the meshes.
+	index = 0;
+	for (int i = lights + spheres; i < lights + spheres + meshes; i++) {
+		for (int j = 0; j < faces; j++) {
+
+			float scale = values[i][1];
+
+			Vector3* vertex1 = new Vector3(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z);
+			Vector3* vertex2 = new Vector3(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z);
+			Vector3* vertex3 = new Vector3(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z);
+
+			Matrix* rotateX = rotateMatrix(values[i][2], 'x');
+			Matrix* rotateY = rotateMatrix(values[i][3], 'y');
+			Matrix* rotateZ = rotateMatrix(values[i][4], 'z');
+
+			Vector3* translate = new Vector3(values[i][5], values[i][6], values[i][7]);
+
+			//TODO rotate and scale vertices
+			float vertices[9] = {vertex1->vector[0], vertex1->vector[1], vertex1->vector[2], vertex2->vector[0], vertex2->vector[1], vertex2->vector[2], vertex3->vector[0], vertex3->vector[1], vertex3->vector[2]};
+
+			new (&polygonObjects[index++]) Polygon(vertices, &values[i][8], &values[i][11], &values[i][14], values[i][17], values[i][18], values[i][19], values[i][20], values[i][21], values[i][22], values[i][23]);
+
+			delete vertex1, vertex2, vertex3, rotateX, rotateY, rotateZ, translate;
+		}
+	}
+}
+
 bool parseLayoutFile(char* path) {
 	ifstream fp(path, ios::in);
 	if(!fp || !fp.is_open()) {
@@ -413,6 +482,9 @@ bool parseLayoutFile(char* path) {
 	int curMesh = 0;
 	char type;
 	int index, count;
+
+	// TODO this loop is gone through one too many times, I think we need to handle a newline at the end of the file
+	// it's actually hitting case 'S' twice, when there is only one sphere in the file (the final fp >> type isn't actually changing type)
 	while (!fp.eof()) {
 		fp >> type;
 		switch (type) {
@@ -426,7 +498,7 @@ bool parseLayoutFile(char* path) {
 			break;
 		case 'M':
 			fp >> meshPaths[curMesh];
-			count = 23;
+			count = 24;
 			index = lights + spheres + curMesh++;
 			break;
 		default:
@@ -434,7 +506,7 @@ bool parseLayoutFile(char* path) {
 			return false;
 		}
 
-		if (curLight >= lights || curSphere || curMesh >= meshes) {
+		if (curLight > lights || curSphere > spheres || curMesh > meshes) {
 			cout << "Failed to parse " << path << endl;
 			return false;
 		}

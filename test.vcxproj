@@ -120,7 +120,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Matrix.cpp" />
+    <ClCompile Include="MatrixMakers.cpp" />
     <ClCompile Include="primitives.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="DisplayObject.cpp" />
@@ -131,6 +134,9 @@
     <ClInclude Include="frame_buffer.h" />
     <ClInclude Include="glut.h" />
     <ClInclude Include="DisplayObject.h" />
+    <ClInclude Include="Light.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="MatrixMakers.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="primitives.h" />
     <ClInclude Include="Ray.h" />

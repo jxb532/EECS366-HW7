@@ -28,8 +28,8 @@ Sphere::Sphere(float* _center, float _radius, float* _ambient, float* _diffuse, 
 	k_specular = _k_specular;
 	specular_exponent = _specular_exponent;
 	refraction_index = _refraction_index;
-	k_refractive = _k_refractive;
 	k_reflective = _k_reflective;
+	k_refractive = _k_refractive;
 }
 
 Polygon::Polygon(float* _vertices, float* _ambient, float* _diffuse, float* _specular, float _k_ambient, float _k_diffuse, float _k_specular, float _specular_exponent, float _refraction_index, float _k_refractive, float _k_reflective) {
@@ -57,6 +57,6 @@ Polygon::Polygon(float* _vertices, float* _ambient, float* _diffuse, float* _spe
 	k_specular = _k_specular;
 	specular_exponent = _specular_exponent;
 	refraction_index = _refraction_index;
-	k_refractive = _k_refractive;
 	k_reflective = _k_reflective;
+	k_refractive = _k_refractive;
 }
