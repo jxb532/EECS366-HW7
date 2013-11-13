@@ -9,6 +9,7 @@
 class Vector3 {
 public:
 	        Vector3(void);
+			Vector3(Vector3* vector);
 		    Vector3(float x, float y, float z);
 	        ~Vector3(void);
 

@@ -8,10 +8,10 @@ using namespace std;
 class Ray {
 public:
 	Ray();
-	Ray(point _origin, Vector3 _direction);
+	Ray(Vector3* _origin, Vector3* _direction);
 	~Ray();
 	
-	point origin;
-	Vector3 direction;
-	Color color;
+	Vector3* origin;
+	Vector3* direction;
+	Color* color;
 };

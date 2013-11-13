@@ -190,10 +190,13 @@ void	display(void)
     // Clear the background
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	/*
 	// Load projections and viewing transforms
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	*/
 
+	/*
 	// Add the lights.
 	glEnable(GL_LIGHTING);
 	for (int i = 0; i < 8; i++) glDisable(LIGHT[i]);
@@ -205,7 +208,9 @@ void	display(void)
 		glLightfv(LIGHT[i], GL_SPECULAR, color);
 		glEnable(LIGHT[i]);
 	}
+	*/
 
+	/*
 	// Add the spheres.
 	for (int i = lights; i < lights + spheres; i++) {
 		glLoadIdentity();
@@ -215,6 +220,7 @@ void	display(void)
 		// TODO: Apply material elements
 		// TODO: delete quad?
 	}
+	*/
 	
 	// Add the meshes.
 	// TODO: Add the meshes.
@@ -420,13 +426,13 @@ void initObjectsAndLights() {
 		new (&lighting[index++]) Light((int)values[i][0], &values[i][1], &values[i][4]);
 	}
 
-	// TODO make sure this works
 	sphereObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Sphere * spheres ) );
 
 	// Add the spheres.
 	index = 0;
 	for (int i = lights; i < lights + spheres; i++) {
-		new (&sphereObjects[index++]) Sphere(&values[i][0], values[i][3], &values[i][4], &values[i][7], &values[i][10], values[i][13], values[i][14], values[i][15], values[i][16], values[i][17], values[i][18], values[i][19]);
+		Material* mat = new Material(&values[i][4], &values[i][7], &values[i][10], values[i][13], values[i][14], values[i][15], values[i][16], values[i][17], values[i][18], values[i][19]);
+		new (&sphereObjects[index++]) Sphere(&values[i][0], values[i][3], mat);
 	}
 	
 
@@ -435,6 +441,9 @@ void initObjectsAndLights() {
 	// Add the meshes.
 	index = 0;
 	for (int i = lights + spheres; i < lights + spheres + meshes; i++) {
+		
+		Material* mat = new Material(&values[i][8], &values[i][11], &values[i][14], values[i][17], values[i][18], values[i][19], values[i][20], values[i][21], values[i][22], values[i][23]);
+		
 		for (int j = 0; j < faces; j++) {
 
 			float scale = values[i][1];
@@ -443,18 +452,20 @@ void initObjectsAndLights() {
 			Vector3* vertex2 = new Vector3(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z);
 			Vector3* vertex3 = new Vector3(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z);
 
+			Vector3* normal1 = new Vector3(vertList[faceList[j].n1].x, vertList[faceList[j].n1].y, vertList[faceList[j].n1].z);
+			Vector3* normal2 = new Vector3(vertList[faceList[j].n2].x, vertList[faceList[j].n2].y, vertList[faceList[j].n2].z);
+			Vector3* normal3 = new Vector3(vertList[faceList[j].n3].x, vertList[faceList[j].n3].y, vertList[faceList[j].n3].z);
+
 			Matrix* rotateX = rotateMatrix(values[i][2], 'x');
 			Matrix* rotateY = rotateMatrix(values[i][3], 'y');
 			Matrix* rotateZ = rotateMatrix(values[i][4], 'z');
 
 			Vector3* translate = new Vector3(values[i][5], values[i][6], values[i][7]);
 
-			//TODO rotate and scale vertices
-			float vertices[9] = {vertex1->vector[0], vertex1->vector[1], vertex1->vector[2], vertex2->vector[0], vertex2->vector[1], vertex2->vector[2], vertex3->vector[0], vertex3->vector[1], vertex3->vector[2]};
+			//TODO rotate, translate, and scale vertices and normals
+			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
 
-			new (&polygonObjects[index++]) Polygon(vertices, &values[i][8], &values[i][11], &values[i][14], values[i][17], values[i][18], values[i][19], values[i][20], values[i][21], values[i][22], values[i][23]);
-
-			delete vertex1, vertex2, vertex3, rotateX, rotateY, rotateZ, translate;
+			delete vertex1, vertex2, vertex3, normal1, normal2, normal3, rotateX, rotateY, rotateZ, translate;
 		}
 	}
 }

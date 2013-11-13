@@ -1,15 +1,15 @@
 #include "Ray.h"
 
 Ray::Ray() {
-		origin = point(0,0,0);
-		direction = Vector3(1,1,1);
-		color = Color();
+		origin = new Vector3(0,0,0);
+		direction = new Vector3(1,1,1);
+		color = new Color();
 }
 
-Ray::Ray(point _origin, Vector3 _direction) {
-		origin = _origin;
-		direction = _direction;
-		color = Color();
+Ray::Ray(Vector3* _origin, Vector3* _direction) {
+		origin = new Vector3(*_origin);
+		direction = &(*_direction / _direction->magnitude());
+		color = new Color();
 }
 
 Ray::~Ray() {

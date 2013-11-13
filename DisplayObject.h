@@ -1,3 +1,6 @@
+#include "Material.h"
+#include "Vector3.h"
+#include "Ray.h"
 
 using namespace std;
 
@@ -5,30 +8,34 @@ using namespace std;
 class DisplayObject {
 public:
 	virtual ~DisplayObject();
+	virtual bool intersects(Ray* ray, Vector3* intersect) = 0;
+	virtual Vector3* normalAtPoint(Vector3* point) = 0;
 
-	float ambient[3];
-	float diffuse[3];
-	float specular[3];
-	float k_ambient;
-	float k_diffuse;
-	float k_specular;
-	float specular_exponent;
-	float refraction_index;
-	float k_refractive;
-	float k_reflective;
+	Material* material;
 };
 
 class Sphere : public DisplayObject {
 public:
-	Sphere(float* _center, float _radius, float* _ambient, float* _diffuse, float* _specular, float _k_ambient, float _k_diffuse, float _k_specular, float _specular_exponent, float _refraction_index, float _k_reflective, float _k_refractive);
-	float center [3];
+	Sphere(float* _center, float _radius, Material* _material);
+	~Sphere();
+	bool intersects(Ray* ray, Vector3* intersect);
+	Vector3* normalAtPoint(Vector3* point);
+
+	Vector3* center;
 	float radius;
 };
 
 class Polygon : public DisplayObject {
 public:
-	Polygon(float* _vertices, float* _ambient, float* _diffuse, float* _specular, float _k_ambient, float _k_diffuse, float _k_specular, float _specular_exponent, float _refraction_index, float _k_reflective, float _k_refractive);
-	// TODO remember to scale and rotate these before construction
-	float vertices[3][3];
+	Polygon(Vector3* vertex1, Vector3* vertex2, Vector3* vertex3, Vector3* normal1, Vector3* normal2, Vector3* normal3, Material* _material);
+	~Polygon();
+	bool intersects(Ray* ray, Vector3* intersect);
+	Vector3* normalAtPoint(Vector3* point);
 
+	Vector3* v1;
+	Vector3* v2;
+	Vector3* v3;
+	Vector3* n1;
+	Vector3* n2;
+	Vector3* n3;
 };
