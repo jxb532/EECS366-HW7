@@ -381,20 +381,20 @@ int main(int argc, char* argv[])
 }
 
 void shootRay(Ray *ray) {
-	// if ray intersects an object
-		//get normal at intersection point
-		//calculate local intensity (I_local)
+	// if ray intersects an object (need to find the CLOSEST intersection, there may be more than one), (we two arrays to search through, polygonObjects and sphereObjects)
+		// get normal at intersection point (DisplayObject.normalAtPoint())
+		// calculate local intensity (I_local)
 		// decrement current depth of trace
 		// if depth of trace > 0
-			// if object is a reflecting object
-				// calculate reflectin vector and include in the ray structure
+			// if object is a reflecting object (if k_reflective > 0)
+				// calculate reflection vector and include in new ray structure
 				// Ray Origin = intersection point
 				// Attenuate the ray (multiply the current k_rg by its value at the previous intersection)
 				// shootRay(reflected ray structure)
 				// if reflected ray intersects an object
 					// combine colors (k_rg I) with I_local
 			// if object is a refracting object
-				// if ray is entering object
+				// if ray is entering object (determine using angle between surface nomal and ray angle)
 					// accumulate the refractive index
 					// increment number of objects that the ray is currently inside
 					// calculate refraction vector and include in refracted ray structure

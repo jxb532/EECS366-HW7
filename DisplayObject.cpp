@@ -6,6 +6,29 @@ DisplayObject::~DisplayObject() {
 	//delete material;
 };
 
+
+// TODO implement
+Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light** lights) {
+	// normalize things
+
+	// for each light:
+		// Vector3 = normalize(light.location - point);
+   
+		// Vector3 R = normalize(((2.0 * N) * NDotL) - L);
+		// Vector3 H = normalize(L + V);
+      
+		// vec3 Ia = pAmbientMat * gl_FrontLightProduct[light].ambient.xyz;
+		// vec3 Id = diffuseMat * gl_FrontLightProduct[light].diffuse.xyz * NDotL;
+		// Id = clamp(Id, 0.0, 1.0);
+		// vec3 Is = specularMat * gl_FrontLightProduct[light].specular.xyz * pow(RDotV, specularPower);
+		// gl_FragColor = vec4((Ia + Id + Is), 1.0);
+
+	// combine colors
+
+	// XXX
+	return NULL;
+}
+
 Sphere::Sphere(float* _center, float _radius, Material* _material) {
 	center = new Vector3(_center[0], _center[1], _center[2]);
 
@@ -102,7 +125,20 @@ bool Polygon::intersects(Ray* _ray, Vector3* intersect) {
 	return false;
 }
 
-// TODO implement
+float polygonArea(Vector3* a, Vector3* b, Vector3* c) {
+	Vector3 ab = *b - *a;
+	Vector3 ac = *c - *a;
+	return ab.cross(&ac).magnitude() / 2;
+}
+
 Vector3* Polygon::normalAtPoint(Vector3* point) {
-	return NULL;
+	// need to interpolate
+	float a1 = polygonArea(point, this->v2, this->v3);
+	float a2 = polygonArea(point, this->v1, this->v3);
+	float a3 = polygonArea(point, this->v1, this->v2);
+	float a = a1 + a2 + a3;
+	Vector3* normal = &((*this->n1 * (a1/a)) + (*this->n2 * (a2/a)) + (*this->n3 * (a3/a)));
+	*normal = *normal / normal->magnitude();
+
+	return normal;
 }

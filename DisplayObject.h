@@ -1,6 +1,7 @@
 #include "Material.h"
 #include "Vector3.h"
 #include "Ray.h"
+#include "Light.h"
 
 using namespace std;
 
@@ -10,6 +11,8 @@ public:
 	virtual ~DisplayObject();
 	virtual bool intersects(Ray* ray, Vector3* intersect) = 0;
 	virtual Vector3* normalAtPoint(Vector3* point) = 0;
+
+	Color* calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light** lights);
 
 	Material* material;
 };
