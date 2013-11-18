@@ -124,7 +124,25 @@ Polygon::~Polygon() {
 
 // TODO implement
 bool Polygon::intersects(Ray* _ray, Vector3* intersect, float* dist) {
-	return false;
+	Vector3 n = (*n2 - *n1).cross(&(*n3 - *n1));
+
+	if (n.dot(_ray->direction) == 0) return false;
+	float t = (n.dot(_ray->origin) + n.dot(n1)) / n.dot(_ray->direction);
+	if (t < 0) return false;
+
+	intersect = &(*_ray->origin + (*_ray->direction * t));
+	*dist = (*intersect - *_ray->origin).magnitude();
+
+	Vector3 edge0 = *v2 - *v1;
+	Vector3 edge1 = *v3 - *v2;
+	Vector3 edge2 = *v1 - *v3;
+	Vector3 c0 = *intersect - *v1;
+	Vector3 c1 = *intersect - *v2;
+	Vector3 c2 = *intersect - *v3;
+
+	return (n.dot(&(edge0.cross(&c0))) > 0 &&
+		n.dot(&(edge1.cross(&c1))) > 0 &&
+		n.dot(&(edge1.cross(&c1))) > 0);
 }
 
 float polygonArea(Vector3* a, Vector3* b, Vector3* c) {

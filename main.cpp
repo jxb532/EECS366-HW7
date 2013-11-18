@@ -452,8 +452,8 @@ bool shootRay(Ray *ray, int depth, int objectsRayIsInside) {
 						float cosTheta = ray->direction->dot(norm) * -1.0;
 						float sinSqTheta = refIndex * refIndex * (1 - (cosTheta * cosTheta));
 						refractionVector = &((*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta))));
-
 					}
+
 					// Attenuate ray (k_tg)
 					Color* attenuatedColor = &(*ray->color * obj->material->k_refractive);
 
@@ -559,8 +559,6 @@ bool parseLayoutFile(char* path) {
 	char type;
 	int index, count;
 
-	// TODO this loop is gone through one too many times, I think we need to handle a newline at the end of the file
-	// it's actually hitting case 'S' twice, when there is only one sphere in the file (the final fp >> type isn't actually changing type)
 	while (!fp.eof()) {
 		fp >> type;
 		switch (type) {
