@@ -8,6 +8,12 @@ public:
 	double r,g,b;
 
 	Color() { r = 0; g = 0; b = 0;}
+	Color(Color* _color)
+	{
+		r = _color->r;
+		g = _color->g;
+		b = _color->b;
+	}
 	Color(double rr, double gg, double bb)
 	{
 		r = rr;

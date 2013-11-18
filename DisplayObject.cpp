@@ -91,11 +91,13 @@ bool Sphere::intersects(Ray* _ray, Vector3* intersect, float* dist) {
     // if t0 is less than zero, the intersection point is at t1
     if (t0 < 0) {
 		*intersect = *_ray->origin + (*_ray->direction * t1);
+		*dist = (*intersect - *_ray->origin).magnitude();
         return true;
 
 	// else the intersection point is at t0
     } else {
         *intersect = *_ray->origin + (*_ray->direction * t0);
+		*dist = (*intersect - *_ray->origin).magnitude();
         return true;
     }
 }

@@ -23,6 +23,7 @@
 #define XY_STEP 1
 #define SLICES 100
 #define STACKS 100
+#define LAYOUT_FILE "samples/red_sphere_and_teapot.rtl"
 
 using namespace std;
 
@@ -45,7 +46,8 @@ FrameBuffer* fb;
 
 void initObjectsAndLights();
 bool parseLayoutFile(char* path);
-void shootRay(Ray *ray);
+bool shootRay(Ray *ray);
+bool shootRay(Ray *ray, int depth, int objectsRayIsInside);
 
 typedef struct _faceStruct {
   int v1,v2,v3;
@@ -53,6 +55,7 @@ typedef struct _faceStruct {
 } faceStruct;
 
 int verts, faces, norms;    // Number of vertices, faces and normals in the system
+int totalFaces = 0;
 point *vertList, *normList; // Vertex and Normal Lists
 faceStruct *faceList;	    // Face List
 DisplayObject *objects;
@@ -380,43 +383,99 @@ int main(int argc, char* argv[])
     return 0;        
 }
 
-void shootRay(Ray *ray) {
+bool shootRay(Ray* ray) {
+	return shootRay(ray, 5, 0);
+}
+
+bool shootRay(Ray *ray, int depth, int objectsRayIsInside) {
 	// if ray intersects an object (need to find the CLOSEST intersection, there may be more than one), (we two arrays to search through, polygonObjects and sphereObjects)
-		// get normal at intersection point (DisplayObject.normalAtPoint())
-		// calculate local intensity (I_local)
-		// decrement current depth of trace
-		// if depth of trace > 0
-			// if object is a reflecting object (if k_reflective > 0)
-				// calculate reflection vector and include in new ray structure
-				// Ray Origin = intersection point
-				// Attenuate the ray (multiply the current k_rg by its value at the previous intersection)
-				// shootRay(reflected ray structure)
-				// if reflected ray intersects an object
-					// combine colors (k_rg I) with I_local
-			// if object is a refracting object
-				// if ray is entering object (determine using angle between surface nomal and ray angle)
-					// accumulate the refractive index
-					// increment number of objects that the ray is currently inside
-					// calculate refraction vector and include in refracted ray structure
-				// else
-					// de-accumulate refractive index
-					// decrement number of objects that the ray is currently inside
-					// calculate refraction vector and include in refracted ray structure
-				// Ray Origin = intersection point
-				// Attenuate ray (k_tg)
-				// shootRay(refracted ray structure)
-				// if refracted ray intersects an object
-					// combine colors (k_tg I) with I_local
+	for (int i = 0; i < spheres + totalFaces; i++) {
+		DisplayObject* obj = i < spheres ? &sphereObjects[i] : &polygonObjects[i - spheres];
+		Vector3* intersect;
+		float* dist;
+		if (obj->intersects(ray, intersect, dist)) {
+
+			// get normal at intersection point (DisplayObject.normalAtPoint())
+			Vector3* norm = obj->normalAtPoint(intersect);
+
+			// calculate local intensity (I_local)
+			Vector3* V = &(*ray->direction * -1.0);
+			Color* localIntensity = obj->calculateIntensityAtPoint(intersect, V, norm, &lighting, lights);
+
+			// decrement current depth of trace
+			// if depth of trace > 0
+			if (depth - 1 > 0) {
+				// if object is a reflecting object
+				if (obj->material->k_reflective > 0) {
+					// calculate reflection vector and include in new ray structure
+					Vector3* reflection = &(*ray->direction - (*norm * (2 * ray->direction->dot(norm))));
+
+					// Attenuate the ray (multiply the current k_rg by its value at the previous intersection)
+					Color* attenuatedColor = &(*ray->color * obj->material->k_reflective);
+
+					Ray* reflectedRay = new Ray(intersect, reflection, attenuatedColor);
+
+					// if reflected ray intersects an object
+					if (shootRay(reflectedRay, depth - 1, objectsRayIsInside)) {
+						// combine colors (k_rg I) with I_local
+						*ray->color = *reflectedRay->color + *localIntensity;
+					}
+					return true;
+				}
+				// if object is a refracting object
+				// TODO make sure a refracted ray does not immediatley intersect an object
+				if (obj->material->k_refractive > 0) {
+					Vector3 * refractionVector = NULL;
+					int refIndex = 0;
+					int objsInside = 0;
+
+					// if ray is entering object
+					if (ray->direction->dot(norm) < 0) {
+						// accumulate the refractive index
+						refIndex = 1 / obj->material->refraction_index;
+
+						// increment number of objects that the ray is currently inside
+						objsInside = objectsRayIsInside + 1;
+
+						// calculate refraction vector and include in refracted ray structure
+						float cosTheta = ray->direction->dot(norm) * -1.0;
+						float sinSqTheta = refIndex * refIndex * (1 - (cosTheta * cosTheta));
+						refractionVector = &((*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta))));
+					} else {
+						// de-accumulate refractive index
+						refIndex = obj->material->refraction_index;
+
+						// decrement number of objects that the ray is currently inside
+						objsInside = objectsRayIsInside - 1;
+
+						// calculate refraction vector and include in refracted ray structure
+						float cosTheta = ray->direction->dot(norm) * -1.0;
+						float sinSqTheta = refIndex * refIndex * (1 - (cosTheta * cosTheta));
+						refractionVector = &((*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta))));
+
+					}
+					// Attenuate ray (k_tg)
+					Color* attenuatedColor = &(*ray->color * obj->material->k_refractive);
+
+					Ray* refractedRay = new Ray(intersect, refractionVector, attenuatedColor);
+
+					// if refracted ray intersects an object
+					if (shootRay(refractedRay, depth - 1, objsInside)) {
+						// combine colors (k_tg I) with I_local
+						*ray->color = *refractedRay->color + *localIntensity;
+					}
+					return true;
+				}
+			}
+		} else {
+			return false;
+		}
+	}
 }
 
 void initObjectsAndLights() {
-	// TODO move these guys into the main directory
-	parseLayoutFile("samples/redsphere.rtl");
 
-	//TODO grab the filename as a string rather than a float
-	char* meshFile = "teapot.obj";
-	//values[lights + spheres][0];
-	meshReader(meshFile, 1.0);
+	parseLayoutFile(LAYOUT_FILE);
 
 	lighting = static_cast<Light*>( ::operator new ( sizeof Light * lights ) );
 
@@ -441,32 +500,38 @@ void initObjectsAndLights() {
 	// Add the meshes.
 	index = 0;
 	for (int i = lights + spheres; i < lights + spheres + meshes; i++) {
-		
+		//TODO test this
+		meshReader(meshPaths[i - lights - spheres], 1.0);
+		totalFaces += faces;
+
 		Material* mat = new Material(&values[i][8], &values[i][11], &values[i][14], values[i][17], values[i][18], values[i][19], values[i][20], values[i][21], values[i][22], values[i][23]);
 		
-		for (int j = 0; j < faces; j++) {
+		
+		float scale = values[i][1];
 
-			float scale = values[i][1];
+		Matrix* rotateX = rotateMatrix(values[i][2], 'x');
+		Matrix* rotateY = rotateMatrix(values[i][3], 'y');
+		Matrix* rotateZ = rotateMatrix(values[i][4], 'z');
+
+		Vector3* translate = new Vector3(values[i][5], values[i][6], values[i][7]);
+
+		for (int j = 0; j < faces; j++) {
 
 			Vector3* vertex1 = new Vector3(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z);
 			Vector3* vertex2 = new Vector3(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z);
 			Vector3* vertex3 = new Vector3(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z);
 
-			Vector3* normal1 = new Vector3(vertList[faceList[j].n1].x, vertList[faceList[j].n1].y, vertList[faceList[j].n1].z);
-			Vector3* normal2 = new Vector3(vertList[faceList[j].n2].x, vertList[faceList[j].n2].y, vertList[faceList[j].n2].z);
-			Vector3* normal3 = new Vector3(vertList[faceList[j].n3].x, vertList[faceList[j].n3].y, vertList[faceList[j].n3].z);
-
-			Matrix* rotateX = rotateMatrix(values[i][2], 'x');
-			Matrix* rotateY = rotateMatrix(values[i][3], 'y');
-			Matrix* rotateZ = rotateMatrix(values[i][4], 'z');
-
-			Vector3* translate = new Vector3(values[i][5], values[i][6], values[i][7]);
+			Vector3* normal1 = new Vector3(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z);
+			Vector3* normal2 = new Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
+			Vector3* normal3 = new Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
 
 			//TODO rotate, translate, and scale vertices and normals
 			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
 
-			delete vertex1, vertex2, vertex3, normal1, normal2, normal3, rotateX, rotateY, rotateZ, translate;
+			delete vertex1, vertex2, vertex3, normal1, normal2, normal3;
 		}
+
+		delete  rotateX, rotateY, rotateZ, translate;
 	}
 }
 
@@ -508,6 +573,7 @@ bool parseLayoutFile(char* path) {
 			index = lights + curSphere++;
 			break;
 		case 'M':
+			meshPaths[curMesh] = new char[50];
 			fp >> meshPaths[curMesh];
 			count = 24;
 			index = lights + spheres + curMesh++;

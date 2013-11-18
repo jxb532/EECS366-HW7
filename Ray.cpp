@@ -6,10 +6,10 @@ Ray::Ray() {
 		color = new Color();
 }
 
-Ray::Ray(Vector3* _origin, Vector3* _direction) {
+Ray::Ray(Vector3* _origin, Vector3* _direction, Color* _color) {
 		origin = new Vector3(*_origin);
 		direction = &(*_direction / _direction->magnitude());
-		color = new Color();
+		color = new Color(_color);
 }
 
 Ray::~Ray() {

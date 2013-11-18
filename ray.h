@@ -8,7 +8,7 @@ using namespace std;
 class Ray {
 public:
 	Ray();
-	Ray(Vector3* _origin, Vector3* _direction);
+	Ray(Vector3* _origin, Vector3* _direction, Color* _color);
 	~Ray();
 	
 	Vector3* origin;
