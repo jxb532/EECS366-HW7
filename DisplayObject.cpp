@@ -8,7 +8,7 @@ DisplayObject::~DisplayObject() {
 
 
 // TODO implement
-Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light** lights) {
+Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light** lights, int numLights) {
 	// normalize things
 
 	// for each light:
@@ -43,7 +43,7 @@ Sphere::~Sphere() {
 
 
 // Adapted from http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection
-bool Sphere::intersects(Ray* _ray, Vector3* intersect) {
+bool Sphere::intersects(Ray* _ray, Vector3* intersect, float* dist) {
 	// transform ray into object space
 	Vector3 rayOrigin = *_ray->origin - *this->center;
 	Ray ray = Ray(&rayOrigin, _ray->direction);
@@ -121,7 +121,7 @@ Polygon::~Polygon() {
 }
 
 // TODO implement
-bool Polygon::intersects(Ray* _ray, Vector3* intersect) {
+bool Polygon::intersects(Ray* _ray, Vector3* intersect, float* dist) {
 	return false;
 }
 
@@ -132,7 +132,6 @@ float polygonArea(Vector3* a, Vector3* b, Vector3* c) {
 }
 
 Vector3* Polygon::normalAtPoint(Vector3* point) {
-	// need to interpolate
 	float a1 = polygonArea(point, this->v2, this->v3);
 	float a2 = polygonArea(point, this->v1, this->v3);
 	float a3 = polygonArea(point, this->v1, this->v2);
