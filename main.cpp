@@ -413,8 +413,7 @@ void initObjectsAndLights() {
 	// TODO move these guys into the main directory
 	parseLayoutFile("samples/redsphere.rtl");
 
-	//TODO grab the filename as a string rather than a float
-	char* meshFile = "teapot.obj";
+	//char* meshFile = "teapot.obj";
 	//values[lights + spheres][0];
 	meshReader(meshFile, 1.0);
 
@@ -494,8 +493,6 @@ bool parseLayoutFile(char* path) {
 	char type;
 	int index, count;
 
-	// TODO this loop is gone through one too many times, I think we need to handle a newline at the end of the file
-	// it's actually hitting case 'S' twice, when there is only one sphere in the file (the final fp >> type isn't actually changing type)
 	while (!fp.eof()) {
 		fp >> type;
 		switch (type) {
