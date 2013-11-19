@@ -23,7 +23,7 @@
 #define XY_STEP 1
 #define SLICES 100
 #define STACKS 100
-#define LAYOUT_FILE "samples/redsphere.rtl"
+#define LAYOUT_FILE "samples/red_sphere_and_teapot.rtl"
 
 using namespace std;
 
@@ -512,19 +512,16 @@ void initObjectsAndLights() {
 
 		for (int j = 0; j < faces; j++) {
 
-			Vector3* vertex1 = new Vector3(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z);
-			Vector3* vertex2 = new Vector3(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z);
-			Vector3* vertex3 = new Vector3(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z);
+			Vector3 vertex1 = Vector3(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z);
+			Vector3 vertex2 = Vector3(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z);
+			Vector3 vertex3 = Vector3(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z);
 
-			Vector3* normal1 = new Vector3(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z);
-			Vector3* normal2 = new Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
-			Vector3* normal3 = new Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
+			Vector3 normal1 = Vector3(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z);
+			Vector3 normal2 = Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
+			Vector3 normal3 = Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
 
 			//TODO rotate, translate, and scale vertices and normals
-			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
-
-			delete vertex1, vertex2, vertex3, normal1, normal2, normal3;
-			vertex1 = vertex2 = vertex3 = normal1 = normal2 = normal3 = NULL;
+			new (&polygonObjects[index++]) Polygon(&vertex1, &vertex2, &vertex3, &normal1, &normal2, &normal3, mat);
 		}
 
 		delete  rotateX, rotateY, rotateZ, translate;
