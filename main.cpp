@@ -369,12 +369,8 @@ void redraw() {
 	}
 }
 
-bool shootRay(Ray* ray) {
-	return shootRay(ray, 5, 0);
-}
-
 // TODO clean up objects
-bool shootRay(Ray *ray, int depth, int objectsRayIsInside) {
+bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 
 	// if depth of trace > 0
 	if (depth < 1) {
