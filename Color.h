@@ -35,5 +35,3 @@ public:
 		return Color(c.r - r, c.g - g, c.b - b);
 	}
 };
-
-#endif

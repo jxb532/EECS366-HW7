@@ -373,8 +373,9 @@ bool shootRay(Ray* ray) {
 	return shootRay(ray, 5, 0);
 }
 
-// TODO clean up objects
-bool shootRay(Ray *ray, int depth, int objectsRayIsInside) {
+// TODO clean up objects (delete-a-thon)
+// TODO figure out why ray->direction is getting destroyed
+bool shootRay(Ray* ray, int depth, int objectsRayIsInside) {
 
 	// if depth of trace > 0
 	if (depth < 1) {
