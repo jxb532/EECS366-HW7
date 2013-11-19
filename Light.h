@@ -1,12 +1,15 @@
 #pragma once
+#include "Color.h"
+#include "Vector3.h"
+
 class Light
 {
 public:
+	enum Type { Directional, Point };
 	Light(int _type, float* _position, float* _color);
 	~Light();
 
-	int type;
-	float position[3];
-	float color[3];
+	Type type;
+	Vector3 position;
+	Color color;
 };
-
