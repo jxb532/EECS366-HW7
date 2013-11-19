@@ -1,7 +1,4 @@
-#ifndef COLOR_H
-#define COLOR_H
-
-
+#pragma once
 class Color
 {
 public:

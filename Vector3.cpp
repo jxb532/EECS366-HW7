@@ -19,6 +19,12 @@ Vector3::Vector3(Vector3* vector) {
 	this->vector[3] = vector->vector[3];
 }
 
+Vector3::Vector3(float* vector) {
+	this->vector[0] = vector[0];
+	this->vector[1] = vector[2];
+	this->vector[3] = vector[3];
+}
+
 Vector3::Vector3(float x, float y, float z) {
 	this->vector[0] = x;
 	this->vector[1] = y;
@@ -69,10 +75,23 @@ Vector3 Vector3::cross(Vector3* v) {
 		this->vector[0]*v->vector[1]-this->vector[1]*v->vector[0]);
 }
 
+Vector3 Vector3::cross(const Vector3 &v) {
+	return Vector3(
+		this->vector[1]*v.vector[2]-this->vector[2]*v.vector[1],
+		this->vector[2]*v.vector[0]-this->vector[0]*v.vector[2],
+		this->vector[0]*v.vector[1]-this->vector[1]*v.vector[0]);
+}
+
 float Vector3::dot(Vector3* v) {
 	return this->vector[0] * v->vector[0] +
 		this->vector[1] * v->vector[1] +
 		this->vector[2] * v->vector[2];
+}
+
+float Vector3::dot(const Vector3 &v) {
+	return this->vector[0] * v.vector[0] +
+		this->vector[1] * v.vector[1] +
+		this->vector[2] * v.vector[2];
 }
 
 float Vector3::magnitude() {
