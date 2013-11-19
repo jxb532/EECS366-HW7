@@ -12,6 +12,7 @@ Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vect
 	// TODO: normalize things
 
 	float temp;
+	Vector3 color (0, 0, 0);
 	for (int i = 0; i < numLights; i++) {
 			if (lights[i].type == Light::Point) {
 			Vector3 lightPos (lights[i].position);
@@ -39,14 +40,11 @@ Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vect
 						material->specular[1] * lights[i].color[1] * temp,
 						material->specular[2] * lights[i].color[2] * temp);
 
-			// gl_FragColor = vec4((Ia + Id + Is), 1.0);
+			color = color + Ia + Id + Is;
 		}
 	}
 
-	// combine colors
-
-	// XXX
-	return NULL;
+	return new Color(color[0], color[1], color[2]);
 }
 
 Sphere::Sphere(float* _center, float _radius, Material* _material) {
