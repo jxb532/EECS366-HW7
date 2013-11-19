@@ -4,6 +4,7 @@
  * 10/07/2013 - Assignment 4                  */
 
 #pragma once
+#include "Vector3.h"
 
 class Matrix {
 private:
@@ -16,6 +17,7 @@ public:
 	        Matrix(int _rows, int _cols);
 			Matrix(int _rows, int _cols, float** _matrix);
 			Matrix(int _rows, int _cols, float* _matrix);
+			Matrix(Vector3 &vector, int extraCols = 0, int extraRows = 0);
 	        ~Matrix(void);
 
 	float   get(int i, int j);
