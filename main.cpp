@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include "glut.h"
-//#include <GL/gl.h>
-//#include <GL/glu.h>
+#include "glut.h"
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <math.h>
 
 #include "frame_buffer.h"
@@ -26,12 +26,6 @@
 #define LAYOUT_FILE "samples/redsphere.rtl"
 
 using namespace std;
-
-//const GLenum LIGHT [] = {
-//	GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3,
-//	GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7
-//};
-
 
 // Global variables
 int window_width, window_height;    // Window dimensions
@@ -177,61 +171,61 @@ void meshReader (char *filename,int sign)
 
 }
 
-//void drawRect(double x, double y, double w, double h)
-//{
-//	glVertex2f(x,y);
-//	glVertex2f(x+w,y);
-//	glVertex2f(x+w,y+h);
-//	glVertex2f(x, y+h);
-//}
+void drawRect(double x, double y, double w, double h)
+{
+	glVertex2f(x,y);
+	glVertex2f(x+w,y);
+	glVertex2f(x+w,y+h);
+	glVertex2f(x, y+h);
+}
 
 
 // The display function. It is called whenever the window needs
 // redrawing (ie: overlapping window moves, resize, maximize)
 // You should redraw your polygons here
-//void	display(void)
-//{
-//    // Clear the background
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//
-//	double w = 10/double(fb->GetWidth());
-//	double h = 10/double(fb->GetHeight());
-//	
-//	Color cl;
-//	glColor3f(0,0,1);
-//	
-//	glBegin(GL_QUADS);
-//
-//	printf("width %d, height %d\n", fb->GetWidth(), fb->GetHeight());
-//
-//	for(int y = 0; y < fb->GetHeight(); y++)
-//	{
-//		for(int x = 0; x < fb->GetHeight(); x++)
-//		{
-//			cl = fb->buffer[x][y].color;
-//			glColor3f(cl.r, cl.g, cl.b);
-//
-//			drawRect(w*x, h*y, w, h);
-//		}
-//	}
-//
-//	glEnd();
-//    glutSwapBuffers();
-//}
+void	display(void)
+{
+    // Clear the background
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	double w = 10/double(fb->GetWidth());
+	double h = 10/double(fb->GetHeight());
+	
+	Color cl;
+	glColor3f(0,0,1);
+	
+	glBegin(GL_QUADS);
+
+	printf("width %d, height %d\n", fb->GetWidth(), fb->GetHeight());
+
+	for(int y = 0; y < fb->GetHeight(); y++)
+	{
+		for(int x = 0; x < fb->GetHeight(); x++)
+		{
+			cl = fb->buffer[x][y].color;
+			glColor3f(cl.r, cl.g, cl.b);
+
+			drawRect(w*x, h*y, w, h);
+		}
+	}
+
+	glEnd();
+    glutSwapBuffers();
+}
 
 
 // This function is called whenever the window is resized. 
 // Parameters are the new dimentions of the window
-//void	resize(int x,int y)
-//{
-//    glViewport(0,0,x,y);
-//    window_width = x;
-//    window_height = y;
-//    
-//    printf("Resized to %d %d\n",x,y);
-//}
+void	resize(int x,int y)
+{
+    glViewport(0,0,x,y);
+    window_width = x;
+    window_height = y;
+    
+    printf("Resized to %d %d\n",x,y);
+}
 
 
 // This function is called whenever the mouse is pressed or released
@@ -255,61 +249,61 @@ void	mouseMotion(int x, int y)
 // This function is called whenever there is a keyboard input
 // key is the ASCII value of the key pressed
 // x and y are the location of the mouse
-//void	keyboard(unsigned char key, int x, int y)
-//{
-//    switch(key) {
-//    case 'q':                           /* Quit */
-//		exit(1);
-//		break;
-//	case '-':
-//		fb->Resize(fb->GetHeight()/2, fb->GetWidth()/2);
-//		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
-//		break;
-//	case '=':
-//		fb->Resize(fb->GetHeight()*2, fb->GetWidth()*2);
-//		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
-//		break;
-//	case ']':
-//		// TODO: move the image plane farther from the origin along the z axis
-//		imagePlaneZ -= Z_STEP;
-//		glMatrixMode(GL_PROJECTION);
-//		glLoadIdentity();
-//		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
-//		break;
-//	case '[':
-//		// TODO: move the image plane closer to the origin along the z axis
-//		imagePlaneZ += Z_STEP;
-//		imagePlaneZ = imagePlaneZ > 0 ? 0 : imagePlaneZ;
-//		glMatrixMode(GL_PROJECTION);
-//		glLoadIdentity();
-//		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
-//		break;
-//	case '.':
-//		// TODO: increase the x,y dimensions of the image plane
-//		imagePlaneXY += XY_STEP;
-//		glMatrixMode(GL_PROJECTION);
-//		glLoadIdentity();
-//		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
-//		break;
-//	case ',':
-//		// TODO: decrease the x,y dimensions of the image plane
-//		imagePlaneXY -= XY_STEP;
-//		imagePlaneXY = imagePlaneXY < 1 ? 1 : imagePlaneXY;
-//		glMatrixMode(GL_PROJECTION);
-//		glLoadIdentity();
-//		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
-//		break;
-//	case 'r':
-//		// TODO redraw the image
-//		redraw();
-//		break;
-//    default:
-//		break;
-//    }
-//
-//    // Schedule a new display event
-//    glutPostRedisplay();
-//}
+void	keyboard(unsigned char key, int x, int y)
+{
+    switch(key) {
+    case 'q':                           /* Quit */
+		exit(1);
+		break;
+	case '-':
+		fb->Resize(fb->GetHeight()/2, fb->GetWidth()/2);
+		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
+		break;
+	case '=':
+		fb->Resize(fb->GetHeight()*2, fb->GetWidth()*2);
+		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
+		break;
+	case ']':
+		// TODO: move the image plane farther from the origin along the z axis
+		imagePlaneZ -= Z_STEP;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+		break;
+	case '[':
+		// TODO: move the image plane closer to the origin along the z axis
+		imagePlaneZ += Z_STEP;
+		imagePlaneZ = imagePlaneZ > 0 ? 0 : imagePlaneZ;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+		break;
+	case '.':
+		// TODO: increase the x,y dimensions of the image plane
+		imagePlaneXY += XY_STEP;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+		break;
+	case ',':
+		// TODO: decrease the x,y dimensions of the image plane
+		imagePlaneXY -= XY_STEP;
+		imagePlaneXY = imagePlaneXY < 1 ? 1 : imagePlaneXY;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+		break;
+	case 'r':
+		// TODO redraw the image
+		redraw();
+		break;
+    default:
+		break;
+    }
+
+    // Schedule a new display event
+    glutPostRedisplay();
+}
 
 
 int main(int argc, char* argv[])
@@ -319,34 +313,32 @@ int main(int argc, char* argv[])
 
 	BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
 
-	
-
     // Initialize GLUT
-    //glutInit(&argc, argv);
-    //glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    //glutCreateWindow("Raytracer");
-    //glutDisplayFunc(display);
-    //glutReshapeFunc(resize);
-    //glutMouseFunc(mouseButton);
-    //glutMotionFunc(mouseMotion);
-    //glutKeyboardFunc(keyboard);
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutCreateWindow("Raytracer");
+    glutDisplayFunc(display);
+    glutReshapeFunc(resize);
+    glutMouseFunc(mouseButton);
+    glutMotionFunc(mouseMotion);
+    glutKeyboardFunc(keyboard);
 
     // Initialize GL
- //   glMatrixMode(GL_PROJECTION);
- //   glLoadIdentity();
-	//glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
- //   glMatrixMode(GL_MODELVIEW);
- //   glLoadIdentity();
- //   glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_POLYGON_SMOOTH);
-	//glEnable(GL_POINT_SMOOTH);
-	//glEnable(GL_LINE_SMOOTH);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+	glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_POLYGON_SMOOTH);
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_LINE_SMOOTH);
 
 	initObjectsAndLights();
 	redraw();
 
     // Switch to main loop
-    //glutMainLoop();
+    glutMainLoop();
     return 0;        
 }
 
@@ -386,9 +378,10 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 		Vector3* curIntersect = new Vector3();
 		float* dist = new float;
 
+		//TODO if current object is outisde of 
 
 		if (currentObj->intersects(ray, curIntersect, dist)) {
-			if (*dist < lowestDist) {
+			if (*dist != 0.0 && *dist < lowestDist) {
 				lowestDist = *dist;
 				delete dist;
 
@@ -414,30 +407,25 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 	// calculate local intensity (I_local)
 	Vector3* V = &(*ray->direction * -1.0);
 	Color* localIntensity = obj->calculateIntensityAtPoint(intersect, V, norm, lighting, lights);
-
-	//XXX
-	localIntensity = new Color(0.2, 0.2, 0.2);
+	Color* totalColor = new Color(localIntensity);
 
 	// if object is a reflecting object
 	if (obj->material->k_reflective > 0) {
+
 		// calculate reflection vector and include in new ray structure
 		Vector3* reflection = &(*ray->direction - (*norm * (2 * ray->direction->dot(norm))));
 		*reflection = *reflection / reflection->magnitude();
 
-		// Attenuate the ray (multiply the current k_rg by its value at the previous intersection)
-		Color* attenuatedColor = &(*ray->color * obj->material->k_reflective);
-
-		Ray* reflectedRay = new Ray(intersect, reflection, attenuatedColor);
+		Ray* reflectedRay = new Ray(intersect, reflection);
 
 		// if reflected ray intersects an object
 		if (shootRay(reflectedRay, depth - 1, objectsRayIsInside)) {
 			// combine colors (k_rg I) with I_local
-			*ray->color = *reflectedRay->color + *localIntensity;
+			totalColor = &((*reflectedRay->color * obj->material->k_reflective) + *totalColor);
 		}
-		return true;
 	}
+
 	// if object is a refracting object
-	// TODO make sure a refracted ray does not immediatley intersect an object
 	if (obj->material->k_refractive > 0) {
 		Vector3 * refractionVector = NULL;
 		int refIndex = 0;
@@ -468,19 +456,17 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 			refractionVector = &((*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta))));
 		}
 
-		// Attenuate ray (k_tg)
-		Color* attenuatedColor = &(*ray->color * obj->material->k_refractive);
-
-		Ray* refractedRay = new Ray(intersect, refractionVector, attenuatedColor);
+		Ray* refractedRay = new Ray(intersect, refractionVector);
 
 		// if refracted ray intersects an object
 		if (shootRay(refractedRay, depth - 1, objsInside)) {
 			// combine colors (k_tg I) with I_local
-			*ray->color = *refractedRay->color + *localIntensity;
+			totalColor = &((*refractedRay->color * obj->material->k_reflective) + *totalColor);
 		}
-		return true;
 	}
 
+	ray->color = totalColor;
+	return true;
 }
 
 void initObjectsAndLights() {
@@ -504,7 +490,6 @@ void initObjectsAndLights() {
 		new (&sphereObjects[index++]) Sphere(&values[i][0], values[i][3], mat);
 	}
 	
-
 	polygonObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Polygon * spheres ) );
 
 	// Add the meshes.
