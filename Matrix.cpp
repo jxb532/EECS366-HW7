@@ -64,7 +64,7 @@ Matrix::~Matrix(void) {
 	}
 }
 
-Matrix::Matrix(Vector3 &vector, int extraCols = 0, int extraRows = 0) {
+Matrix::Matrix(Vector3 &vector, int extraCols, int extraRows) {
 	matrix = new float*[1 + extraRows];
 	matrix[0] = new float[3 + extraCols];
 	matrix[0][0] = vector[0];
@@ -183,4 +183,8 @@ float* Matrix::toArray() {
 		}
 	}
 	return temp;
+}
+
+Vector3* Matrix::toVector3() {
+	return new Vector3(matrix[0][0], matrix[1][0], matrix[2][0]);
 }
