@@ -75,6 +75,11 @@ Matrix* translateMatrix(float x, float y, float z) {
 	return new Matrix(3, 1, matrix);
 }
 
+Matrix* scaleMatrix(float scale) {
+	// TODO: Implement.
+	return NULL;
+}
+
 Matrix* perspectiveMatrix(Vector3 prp, Vector3 vp, float s, float t, float d) {
 	float matrix[] = {
 		prp[Z] - vp[Z], 0, 0, 0,

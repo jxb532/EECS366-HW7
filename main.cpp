@@ -520,7 +520,13 @@ void initObjectsAndLights() {
 			Vector3* normal2 = new Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
 			Vector3* normal3 = new Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
 
-			//TODO rotate, translate, and scale vertices and normals
+			// TODO: rotate, translate, and scale vertices and normals
+			Matrix* tr = translateMatrix(values[i][4], values[i][5], values[i][6]);
+			Matrix* rx = rotateMatrix(values[i][1], 'x');
+			Matrix* ry = rotateMatrix(values[i][2], 'y');
+			Matrix* rz = rotateMatrix(values[i][3], 'z');
+			Matrix* sc = scaleMatrix(values[i][0]);
+
 			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
 
 			delete vertex1, vertex2, vertex3, normal1, normal2, normal3;

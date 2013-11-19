@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Matrix.h"
+#include "Vector3.h"
 
 Matrix::Matrix() {
 	rows = 0;
@@ -60,6 +61,27 @@ Matrix::~Matrix(void) {
 	if (matrix) {
 		delete [] matrix;
 		matrix = NULL;
+	}
+}
+
+Matrix::Matrix(Vector3 &vector, int extraCols = 0, int extraRows = 0) {
+	matrix = new float*[1 + extraRows];
+	matrix[0] = new float[3 + extraCols];
+	matrix[0][0] = vector[0];
+	matrix[0][1] = vector[1];
+	matrix[0][2] = vector[2];
+
+	// Fill remaining columns in the first row.
+	for(int i = 0; i < extraCols; i++) {
+		matrix[0][i + 3] = 0;
+	}
+
+	// Fill remaining rows.
+	for (int i = 0; i < extraRows; ++i) {
+		matrix[i] = new float[extraCols];
+		for (int j = 0; j < extraCols; ++j) {
+			matrix[i][j] = (i == j) ? 1 : 0;
+		}
 	}
 }
 
