@@ -266,32 +266,32 @@ void	keyboard(unsigned char key, int x, int y)
 	case ']':
 		// TODO: move the image plane farther from the origin along the z axis
 		imagePlaneZ -= Z_STEP;
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+		//glMatrixMode(GL_PROJECTION);
+		//glLoadIdentity();
+		//glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
 		break;
 	case '[':
 		// TODO: move the image plane closer to the origin along the z axis
 		imagePlaneZ += Z_STEP;
 		imagePlaneZ = imagePlaneZ > 0 ? 0 : imagePlaneZ;
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+		//glMatrixMode(GL_PROJECTION);
+		//glLoadIdentity();
+		//glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
 		break;
 	case '.':
 		// TODO: increase the x,y dimensions of the image plane
 		imagePlaneXY += XY_STEP;
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+		//glMatrixMode(GL_PROJECTION);
+		//glLoadIdentity();
+		//glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
 		break;
 	case ',':
 		// TODO: decrease the x,y dimensions of the image plane
 		imagePlaneXY -= XY_STEP;
 		imagePlaneXY = imagePlaneXY < 1 ? 1 : imagePlaneXY;
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+		//glMatrixMode(GL_PROJECTION);
+		//glLoadIdentity();
+		//glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
 		break;
 	case 'r':
 		// TODO redraw the image
@@ -326,7 +326,8 @@ int main(int argc, char* argv[])
     // Initialize GL
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-	glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+	//glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+	glOrtho(0,10,0,10,-10000,10000);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glEnable(GL_DEPTH_TEST);
@@ -345,8 +346,8 @@ int main(int argc, char* argv[])
 void redraw() {
 	for (int i = 0; i < fb->GetWidth(); i++) {
 		for (int j = 0; j < fb->GetHeight(); j++) {
-			float x = (((float)imagePlaneXY * 2) / (float)fb->GetWidth()) * (float)i;
-			float y = (((float)imagePlaneXY * 2) / (float)fb->GetHeight()) * (float)j;
+			float x = (((float)imagePlaneXY * 2) / (float)fb->GetWidth()) * (float)i - (float)imagePlaneXY;
+			float y = (((float)imagePlaneXY * 2) / (float)fb->GetHeight()) * (float)j - (float)imagePlaneXY;
 
 			Vector3* origin = new Vector3(x, y, 0.0);
 			Vector3* direction = new Vector3(0.0, 0.0, -1.0);
@@ -381,7 +382,7 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 		//TODO if current object is outisde of 
 
 		if (currentObj->intersects(ray, curIntersect, dist)) {
-			if (*dist != 0.0 && *dist < lowestDist) {
+			if (*dist > 0.001 && *dist < lowestDist) {
 				lowestDist = *dist;
 				delete dist;
 
