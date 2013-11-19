@@ -124,7 +124,7 @@ bool Sphere::intersects(Ray* _ray, Vector3* intersect, float* dist) {
 
 Vector3* Sphere::normalAtPoint(Vector3* point) {
 	Vector3 norm = *point - *this->center;
-	return &(norm / norm.magnitude());
+	return new Vector3(&(norm / norm.magnitude()));
 }
 
 Polygon::Polygon(Vector3* vertex1, Vector3* vertex2, Vector3* vertex3, Vector3* normal1, Vector3* normal2, Vector3* normal3, Material* _material) {
@@ -176,7 +176,7 @@ Vector3* Polygon::normalAtPoint(Vector3* point) {
 	float a3 = polygonArea(point, this->v1, this->v2);
 	float a = a1 + a2 + a3;
 	Vector3* normal = &((*this->n1 * (a1/a)) + (*this->n2 * (a2/a)) + (*this->n3 * (a3/a)));
-	*normal = *normal / normal->magnitude();
+	normal = new Vector3(*normal / normal->magnitude());
 
 	return normal;
 }
