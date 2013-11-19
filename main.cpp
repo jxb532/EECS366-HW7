@@ -23,7 +23,7 @@
 #define XY_STEP 1
 #define SLICES 100
 #define STACKS 100
-#define LAYOUT_FILE "samples/red_sphere_and_teapot.rtl"
+#define LAYOUT_FILE "samples/redsphere.rtl"
 
 using namespace std;
 
@@ -45,6 +45,7 @@ int lights, spheres, meshes;
 FrameBuffer* fb;
 
 void initObjectsAndLights();
+void redraw();
 bool parseLayoutFile(char* path);
 bool shootRay(Ray *ray);
 bool shootRay(Ray *ray, int depth, int objectsRayIsInside);
@@ -193,42 +194,6 @@ void	display(void)
     // Clear the background
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*
-	// Load projections and viewing transforms
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	*/
-
-	/*
-	// Add the lights.
-	glEnable(GL_LIGHTING);
-	for (int i = 0; i < 8; i++) glDisable(LIGHT[i]);
-	for (int i = 0; i < lights; i++) {
-		GLfloat color[4] = { values[i][4], values[i][5], values[i][6], 1 };
-		GLfloat position[4] = { values[i][1], values[i][2], values[i][3], 1 };
-		glLightfv(LIGHT[i], values[i][0] == 0 ? GL_SPOT_DIRECTION : GL_POSITION, position);
-		glLightfv(LIGHT[i], GL_DIFFUSE, color);
-		glLightfv(LIGHT[i], GL_SPECULAR, color);
-		glEnable(LIGHT[i]);
-	}
-	*/
-
-	/*
-	// Add the spheres.
-	for (int i = lights; i < lights + spheres; i++) {
-		glLoadIdentity();
-		glTranslatef(values[i][0], values[i][1], values[i][2]);
-		GLUquadric* quad = gluNewQuadric();
-		gluSphere(quad, values[i][3], SLICES, STACKS);
-		// TODO: Apply material elements
-		// TODO: delete quad?
-	}
-	*/
-	
-	// Add the meshes.
-	// TODO: Add the meshes.
-
-   
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	double w = 10/double(fb->GetWidth());
@@ -336,6 +301,7 @@ void	keyboard(unsigned char key, int x, int y)
 		break;
 	case 'r':
 		// TODO redraw the image
+		redraw();
 		break;
     default:
 		break;
@@ -377,100 +343,148 @@ int main(int argc, char* argv[])
 	glEnable(GL_LINE_SMOOTH);
 
 	initObjectsAndLights();
+	redraw();
 
     // Switch to main loop
     glutMainLoop();
     return 0;        
 }
 
+void redraw() {
+	for (int i = 0; i < fb->GetWidth(); i++) {
+		for (int j = 0; j < fb->GetHeight(); j++) {
+			float x = (((float)imagePlaneXY * 2) / (float)fb->GetWidth()) * (float)i;
+			float y = (((float)imagePlaneXY * 2) / (float)fb->GetHeight()) * (float)j;
+
+			Vector3* origin = new Vector3(x, y, 0.0);
+			Vector3* direction = new Vector3(0.0, 0.0, -1.0);
+			Ray* ray = new Ray(origin, direction);
+			shootRay(ray);
+			fb->SetPixel(i, j, ray->color, 0);
+
+			delete origin, direction, ray;
+			origin = direction = NULL;
+			ray = NULL;
+		}
+	}
+}
+
 bool shootRay(Ray* ray) {
 	return shootRay(ray, 5, 0);
 }
 
+// TODO clean up objects
 bool shootRay(Ray *ray, int depth, int objectsRayIsInside) {
-	// if ray intersects an object (need to find the CLOSEST intersection, there may be more than one), (we two arrays to search through, polygonObjects and sphereObjects)
+
+	// if depth of trace > 0
+	if (depth < 1) {
+		return false;
+	}
+
+	float lowestDist = FLT_MAX;
+	DisplayObject* obj = NULL;
+	Vector3* intersect = NULL;
+	
 	for (int i = 0; i < spheres + totalFaces; i++) {
-		DisplayObject* obj = i < spheres ? &sphereObjects[i] : &polygonObjects[i - spheres];
-		Vector3* intersect;
-		float* dist;
-		if (obj->intersects(ray, intersect, dist)) {
+		DisplayObject* currentObj = i < spheres ? &sphereObjects[i] : &polygonObjects[i - spheres];
+		Vector3* curIntersect = new Vector3();
+		float* dist = new float;
 
-			// get normal at intersection point (DisplayObject.normalAtPoint())
-			Vector3* norm = obj->normalAtPoint(intersect);
 
-			// calculate local intensity (I_local)
-			Vector3* V = &(*ray->direction * -1.0);
-			Color* localIntensity = obj->calculateIntensityAtPoint(intersect, V, norm, &lighting, lights);
+		if (currentObj->intersects(ray, curIntersect, dist)) {
+			if (*dist < lowestDist) {
+				lowestDist = *dist;
+				delete dist;
 
-			// decrement current depth of trace
-			// if depth of trace > 0
-			if (depth - 1 > 0) {
-				// if object is a reflecting object
-				if (obj->material->k_reflective > 0) {
-					// calculate reflection vector and include in new ray structure
-					Vector3* reflection = &(*ray->direction - (*norm * (2 * ray->direction->dot(norm))));
+				delete obj;
+				obj = currentObj;
 
-					// Attenuate the ray (multiply the current k_rg by its value at the previous intersection)
-					Color* attenuatedColor = &(*ray->color * obj->material->k_reflective);
-
-					Ray* reflectedRay = new Ray(intersect, reflection, attenuatedColor);
-
-					// if reflected ray intersects an object
-					if (shootRay(reflectedRay, depth - 1, objectsRayIsInside)) {
-						// combine colors (k_rg I) with I_local
-						*ray->color = *reflectedRay->color + *localIntensity;
-					}
-					return true;
-				}
-				// if object is a refracting object
-				// TODO make sure a refracted ray does not immediatley intersect an object
-				if (obj->material->k_refractive > 0) {
-					Vector3 * refractionVector = NULL;
-					int refIndex = 0;
-					int objsInside = 0;
-
-					// if ray is entering object
-					if (ray->direction->dot(norm) < 0) {
-						// accumulate the refractive index
-						refIndex = 1 / obj->material->refraction_index;
-
-						// increment number of objects that the ray is currently inside
-						objsInside = objectsRayIsInside + 1;
-
-						// calculate refraction vector and include in refracted ray structure
-						float cosTheta = ray->direction->dot(norm) * -1.0;
-						float sinSqTheta = refIndex * refIndex * (1 - (cosTheta * cosTheta));
-						refractionVector = &((*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta))));
-					} else {
-						// de-accumulate refractive index
-						refIndex = obj->material->refraction_index;
-
-						// decrement number of objects that the ray is currently inside
-						objsInside = objectsRayIsInside - 1;
-
-						// calculate refraction vector and include in refracted ray structure
-						float cosTheta = ray->direction->dot(norm) * -1.0;
-						float sinSqTheta = refIndex * refIndex * (1 - (cosTheta * cosTheta));
-						refractionVector = &((*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta))));
-					}
-
-					// Attenuate ray (k_tg)
-					Color* attenuatedColor = &(*ray->color * obj->material->k_refractive);
-
-					Ray* refractedRay = new Ray(intersect, refractionVector, attenuatedColor);
-
-					// if refracted ray intersects an object
-					if (shootRay(refractedRay, depth - 1, objsInside)) {
-						// combine colors (k_tg I) with I_local
-						*ray->color = *refractedRay->color + *localIntensity;
-					}
-					return true;
-				}
+				delete intersect;
+				intersect = curIntersect;
 			}
 		} else {
-			return false;
+			delete curIntersect;
+			delete dist;
 		}
 	}
+
+	if (lowestDist == FLT_MAX) {
+		return false;
+	}
+
+	// get normal at intersection point (DisplayObject.normalAtPoint())
+	Vector3* norm = obj->normalAtPoint(intersect);
+
+	// calculate local intensity (I_local)
+	Vector3* V = &(*ray->direction * -1.0);
+	Color* localIntensity = obj->calculateIntensityAtPoint(intersect, V, norm, &lighting, lights);
+
+	//XXX
+	localIntensity = new Color(0.2, 0.2, 0.2);
+
+	// if object is a reflecting object
+	if (obj->material->k_reflective > 0) {
+		// calculate reflection vector and include in new ray structure
+		Vector3* reflection = &(*ray->direction - (*norm * (2 * ray->direction->dot(norm))));
+		*reflection = *reflection / reflection->magnitude();
+
+		// Attenuate the ray (multiply the current k_rg by its value at the previous intersection)
+		Color* attenuatedColor = &(*ray->color * obj->material->k_reflective);
+
+		Ray* reflectedRay = new Ray(intersect, reflection, attenuatedColor);
+
+		// if reflected ray intersects an object
+		if (shootRay(reflectedRay, depth - 1, objectsRayIsInside)) {
+			// combine colors (k_rg I) with I_local
+			*ray->color = *reflectedRay->color + *localIntensity;
+		}
+		return true;
+	}
+	// if object is a refracting object
+	// TODO make sure a refracted ray does not immediatley intersect an object
+	if (obj->material->k_refractive > 0) {
+		Vector3 * refractionVector = NULL;
+		int refIndex = 0;
+		int objsInside = 0;
+
+		// if ray is entering object
+		if (ray->direction->dot(norm) < 0) {
+			// accumulate the refractive index
+			refIndex = 1 / obj->material->refraction_index;
+
+			// increment number of objects that the ray is currently inside
+			objsInside = objectsRayIsInside + 1;
+
+			// calculate refraction vector and include in refracted ray structure
+			float cosTheta = ray->direction->dot(norm) * -1.0;
+			float sinSqTheta = refIndex * refIndex * (1 - (cosTheta * cosTheta));
+			refractionVector = &((*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta))));
+		} else {
+			// de-accumulate refractive index
+			refIndex = obj->material->refraction_index;
+
+			// decrement number of objects that the ray is currently inside
+			objsInside = objectsRayIsInside - 1;
+
+			// calculate refraction vector and include in refracted ray structure
+			float cosTheta = ray->direction->dot(norm) * -1.0;
+			float sinSqTheta = refIndex * refIndex * (1 - (cosTheta * cosTheta));
+			refractionVector = &((*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta))));
+		}
+
+		// Attenuate ray (k_tg)
+		Color* attenuatedColor = &(*ray->color * obj->material->k_refractive);
+
+		Ray* refractedRay = new Ray(intersect, refractionVector, attenuatedColor);
+
+		// if refracted ray intersects an object
+		if (shootRay(refractedRay, depth - 1, objsInside)) {
+			// combine colors (k_tg I) with I_local
+			*ray->color = *refractedRay->color + *localIntensity;
+		}
+		return true;
+	}
+
 }
 
 void initObjectsAndLights() {
@@ -500,7 +514,6 @@ void initObjectsAndLights() {
 	// Add the meshes.
 	index = 0;
 	for (int i = lights + spheres; i < lights + spheres + meshes; i++) {
-		//TODO test this
 		meshReader(meshPaths[i - lights - spheres], 1.0);
 		totalFaces += faces;
 
@@ -529,9 +542,12 @@ void initObjectsAndLights() {
 			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
 
 			delete vertex1, vertex2, vertex3, normal1, normal2, normal3;
+			vertex1 = vertex2 = vertex3 = normal1 = normal2 = normal3 = NULL;
 		}
 
 		delete  rotateX, rotateY, rotateZ, translate;
+		rotateX = rotateY = rotateZ = NULL;
+		translate = NULL;
 	}
 }
 
