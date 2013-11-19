@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "glut.h"
-#include <GL/gl.h>
-#include <GL/glu.h>
+//#include "glut.h"
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 #include <math.h>
 
 #include "frame_buffer.h"
@@ -27,10 +27,10 @@
 
 using namespace std;
 
-const GLenum LIGHT [] = {
-	GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3,
-	GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7
-};
+//const GLenum LIGHT [] = {
+//	GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3,
+//	GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7
+//};
 
 
 // Global variables
@@ -177,61 +177,61 @@ void meshReader (char *filename,int sign)
 
 }
 
-void drawRect(double x, double y, double w, double h)
-{
-	glVertex2f(x,y);
-	glVertex2f(x+w,y);
-	glVertex2f(x+w,y+h);
-	glVertex2f(x, y+h);
-}
+//void drawRect(double x, double y, double w, double h)
+//{
+//	glVertex2f(x,y);
+//	glVertex2f(x+w,y);
+//	glVertex2f(x+w,y+h);
+//	glVertex2f(x, y+h);
+//}
 
 
 // The display function. It is called whenever the window needs
 // redrawing (ie: overlapping window moves, resize, maximize)
 // You should redraw your polygons here
-void	display(void)
-{
-    // Clear the background
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	double w = 10/double(fb->GetWidth());
-	double h = 10/double(fb->GetHeight());
-	
-	Color cl;
-	glColor3f(0,0,1);
-	
-	glBegin(GL_QUADS);
-
-	printf("width %d, height %d\n", fb->GetWidth(), fb->GetHeight());
-
-	for(int y = 0; y < fb->GetHeight(); y++)
-	{
-		for(int x = 0; x < fb->GetHeight(); x++)
-		{
-			cl = fb->buffer[x][y].color;
-			glColor3f(cl.r, cl.g, cl.b);
-
-			drawRect(w*x, h*y, w, h);
-		}
-	}
-
-	glEnd();
-    glutSwapBuffers();
-}
+//void	display(void)
+//{
+//    // Clear the background
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//
+//	double w = 10/double(fb->GetWidth());
+//	double h = 10/double(fb->GetHeight());
+//	
+//	Color cl;
+//	glColor3f(0,0,1);
+//	
+//	glBegin(GL_QUADS);
+//
+//	printf("width %d, height %d\n", fb->GetWidth(), fb->GetHeight());
+//
+//	for(int y = 0; y < fb->GetHeight(); y++)
+//	{
+//		for(int x = 0; x < fb->GetHeight(); x++)
+//		{
+//			cl = fb->buffer[x][y].color;
+//			glColor3f(cl.r, cl.g, cl.b);
+//
+//			drawRect(w*x, h*y, w, h);
+//		}
+//	}
+//
+//	glEnd();
+//    glutSwapBuffers();
+//}
 
 
 // This function is called whenever the window is resized. 
 // Parameters are the new dimentions of the window
-void	resize(int x,int y)
-{
-    glViewport(0,0,x,y);
-    window_width = x;
-    window_height = y;
-    
-    printf("Resized to %d %d\n",x,y);
-}
+//void	resize(int x,int y)
+//{
+//    glViewport(0,0,x,y);
+//    window_width = x;
+//    window_height = y;
+//    
+//    printf("Resized to %d %d\n",x,y);
+//}
 
 
 // This function is called whenever the mouse is pressed or released
@@ -255,61 +255,61 @@ void	mouseMotion(int x, int y)
 // This function is called whenever there is a keyboard input
 // key is the ASCII value of the key pressed
 // x and y are the location of the mouse
-void	keyboard(unsigned char key, int x, int y)
-{
-    switch(key) {
-    case 'q':                           /* Quit */
-		exit(1);
-		break;
-	case '-':
-		fb->Resize(fb->GetHeight()/2, fb->GetWidth()/2);
-		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
-		break;
-	case '=':
-		fb->Resize(fb->GetHeight()*2, fb->GetWidth()*2);
-		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
-		break;
-	case ']':
-		// TODO: move the image plane farther from the origin along the z axis
-		imagePlaneZ -= Z_STEP;
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
-		break;
-	case '[':
-		// TODO: move the image plane closer to the origin along the z axis
-		imagePlaneZ += Z_STEP;
-		imagePlaneZ = imagePlaneZ > 0 ? 0 : imagePlaneZ;
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
-		break;
-	case '.':
-		// TODO: increase the x,y dimensions of the image plane
-		imagePlaneXY += XY_STEP;
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
-		break;
-	case ',':
-		// TODO: decrease the x,y dimensions of the image plane
-		imagePlaneXY -= XY_STEP;
-		imagePlaneXY = imagePlaneXY < 1 ? 1 : imagePlaneXY;
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
-		break;
-	case 'r':
-		// TODO redraw the image
-		redraw();
-		break;
-    default:
-		break;
-    }
-
-    // Schedule a new display event
-    glutPostRedisplay();
-}
+//void	keyboard(unsigned char key, int x, int y)
+//{
+//    switch(key) {
+//    case 'q':                           /* Quit */
+//		exit(1);
+//		break;
+//	case '-':
+//		fb->Resize(fb->GetHeight()/2, fb->GetWidth()/2);
+//		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
+//		break;
+//	case '=':
+//		fb->Resize(fb->GetHeight()*2, fb->GetWidth()*2);
+//		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
+//		break;
+//	case ']':
+//		// TODO: move the image plane farther from the origin along the z axis
+//		imagePlaneZ -= Z_STEP;
+//		glMatrixMode(GL_PROJECTION);
+//		glLoadIdentity();
+//		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+//		break;
+//	case '[':
+//		// TODO: move the image plane closer to the origin along the z axis
+//		imagePlaneZ += Z_STEP;
+//		imagePlaneZ = imagePlaneZ > 0 ? 0 : imagePlaneZ;
+//		glMatrixMode(GL_PROJECTION);
+//		glLoadIdentity();
+//		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+//		break;
+//	case '.':
+//		// TODO: increase the x,y dimensions of the image plane
+//		imagePlaneXY += XY_STEP;
+//		glMatrixMode(GL_PROJECTION);
+//		glLoadIdentity();
+//		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+//		break;
+//	case ',':
+//		// TODO: decrease the x,y dimensions of the image plane
+//		imagePlaneXY -= XY_STEP;
+//		imagePlaneXY = imagePlaneXY < 1 ? 1 : imagePlaneXY;
+//		glMatrixMode(GL_PROJECTION);
+//		glLoadIdentity();
+//		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+//		break;
+//	case 'r':
+//		// TODO redraw the image
+//		redraw();
+//		break;
+//    default:
+//		break;
+//    }
+//
+//    // Schedule a new display event
+//    glutPostRedisplay();
+//}
 
 
 int main(int argc, char* argv[])
@@ -322,31 +322,31 @@ int main(int argc, char* argv[])
 	
 
     // Initialize GLUT
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    glutCreateWindow("Raytracer");
-    glutDisplayFunc(display);
-    glutReshapeFunc(resize);
-    glutMouseFunc(mouseButton);
-    glutMotionFunc(mouseMotion);
-    glutKeyboardFunc(keyboard);
+    //glutInit(&argc, argv);
+    //glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    //glutCreateWindow("Raytracer");
+    //glutDisplayFunc(display);
+    //glutReshapeFunc(resize);
+    //glutMouseFunc(mouseButton);
+    //glutMotionFunc(mouseMotion);
+    //glutKeyboardFunc(keyboard);
 
     // Initialize GL
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-	glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glEnable(GL_DEPTH_TEST);
-	glEnable(GL_POLYGON_SMOOTH);
-	glEnable(GL_POINT_SMOOTH);
-	glEnable(GL_LINE_SMOOTH);
+ //   glMatrixMode(GL_PROJECTION);
+ //   glLoadIdentity();
+	//glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
+ //   glMatrixMode(GL_MODELVIEW);
+ //   glLoadIdentity();
+ //   glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_POLYGON_SMOOTH);
+	//glEnable(GL_POINT_SMOOTH);
+	//glEnable(GL_LINE_SMOOTH);
 
 	initObjectsAndLights();
 	redraw();
 
     // Switch to main loop
-    glutMainLoop();
+    //glutMainLoop();
     return 0;        
 }
 
@@ -359,7 +359,7 @@ void redraw() {
 			Vector3* origin = new Vector3(x, y, 0.0);
 			Vector3* direction = new Vector3(0.0, 0.0, -1.0);
 			Ray* ray = new Ray(origin, direction);
-			shootRay(ray);
+			shootRay(ray, 5, 0);
 			fb->SetPixel(i, j, ray->color, 0);
 
 			delete origin, direction, ray;
@@ -369,13 +369,9 @@ void redraw() {
 	}
 }
 
-bool shootRay(Ray* ray) {
-	return shootRay(ray, 5, 0);
-}
-
 // TODO clean up objects (delete-a-thon)
 // TODO figure out why ray->direction is getting destroyed
-bool shootRay(Ray* ray, int depth, int objectsRayIsInside) {
+bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 
 	// if depth of trace > 0
 	if (depth < 1) {

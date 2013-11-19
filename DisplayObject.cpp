@@ -7,21 +7,28 @@ DisplayObject::~DisplayObject() {
 };
 
 
-// TODO implement
+// TODO: implement
 Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light** lights, int numLights) {
-	// normalize things
+	// TODO: normalize things
 
-	// for each light:
-		// Vector3 = normalize(light.location - point);
-   
-		// Vector3 R = normalize(((2.0 * N) * NDotL) - L);
-		// Vector3 H = normalize(L + V);
-      
-		// vec3 Ia = pAmbientMat * gl_FrontLightProduct[light].ambient.xyz;
-		// vec3 Id = diffuseMat * gl_FrontLightProduct[light].diffuse.xyz * NDotL;
-		// Id = clamp(Id, 0.0, 1.0);
-		// vec3 Is = specularMat * gl_FrontLightProduct[light].specular.xyz * pow(RDotV, specularPower);
-		// gl_FragColor = vec4((Ia + Id + Is), 1.0);
+	for (int i = 0; i < numLights; i++) {
+			if (lights[i]->type == Light::Point) {
+			Vector3 lightPos (lights[i]->position);
+			Vector3 L = (lightPos - *point);
+			Vector3 R = ((*N * 2.0) * N->dot(L)) - L;
+			Vector3 H = L + *V;
+			L = L / L.magnitude();
+			R = R / R.magnitude();
+			H = H / H.magnitude();
+		  
+			// vec3 Ia = pAmbientMat * gl_FrontLightProduct[light].ambient.xyz;
+			
+			// vec3 Id = diffuseMat * gl_FrontLightProduct[light].diffuse.xyz * NDotL;
+			// Id = clamp(Id, 0.0, 1.0);
+			// vec3 Is = specularMat * gl_FrontLightProduct[light].specular.xyz * pow(RDotV, specularPower);
+			// gl_FragColor = vec4((Ia + Id + Is), 1.0);
+		}
+	}
 
 	// combine colors
 
@@ -122,7 +129,6 @@ Polygon::~Polygon() {
 	delete v1, v2, v3, n1, n2, n3;
 }
 
-// TODO implement
 bool Polygon::intersects(Ray* _ray, Vector3* intersect, float* dist) {
 	Vector3 n = (*n2 - *n1).cross(&(*n3 - *n1));
 
