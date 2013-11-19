@@ -8,12 +8,13 @@ DisplayObject::~DisplayObject() {
 
 
 // TODO: implement
-Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light** lights, int numLights) {
+Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light* lights, int numLights) {
 	// TODO: normalize things
 
+	float temp;
 	for (int i = 0; i < numLights; i++) {
-			if (lights[i]->type == Light::Point) {
-			Vector3 lightPos (lights[i]->position);
+			if (lights[i].type == Light::Point) {
+			Vector3 lightPos (lights[i].position);
 			Vector3 L = (lightPos - *point);
 			Vector3 R = ((*N * 2.0) * N->dot(L)) - L;
 			Vector3 H = L + *V;
@@ -21,11 +22,23 @@ Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vect
 			R = R / R.magnitude();
 			H = H / H.magnitude();
 		  
-			// vec3 Ia = pAmbientMat * gl_FrontLightProduct[light].ambient.xyz;
-			
-			// vec3 Id = diffuseMat * gl_FrontLightProduct[light].diffuse.xyz * NDotL;
-			// Id = clamp(Id, 0.0, 1.0);
-			// vec3 Is = specularMat * gl_FrontLightProduct[light].specular.xyz * pow(RDotV, specularPower);
+			Vector3 Ia (material->ambient[0] * lights[i].color[0],
+						material->ambient[1] * lights[i].color[1],
+						material->ambient[2] * lights[i].color[2]);
+
+			temp = N->dot(L);
+			Vector3 Id (material->diffuse[0] * lights[i].color[0] * temp,
+						material->diffuse[1] * lights[i].color[1] * temp,
+						material->diffuse[2] * lights[i].color[2] * temp);
+			Id[0] = (Id[0] > 0) ? (Id[0] < 1) ? Id[0] : 1 : 0;
+			Id[1] = (Id[1] > 0) ? (Id[1] < 1) ? Id[1] : 1 : 0;
+			Id[2] = (Id[2] > 0) ? (Id[2] < 1) ? Id[2] : 1 : 0;
+
+			temp = powf(R.dot(V), material->specular_exponent);
+			Vector3 Is (material->specular[0] * lights[i].color[0] * temp,
+						material->specular[1] * lights[i].color[1] * temp,
+						material->specular[2] * lights[i].color[2] * temp);
+
 			// gl_FragColor = vec4((Ia + Id + Is), 1.0);
 		}
 	}

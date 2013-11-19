@@ -12,7 +12,7 @@ public:
 	virtual bool intersects(Ray* ray, Vector3* intersect, float* dist) = 0;
 	virtual Vector3* normalAtPoint(Vector3* point) = 0;
 
-	Color* calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light** lights, int numLights);
+	Color* calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light* lights, int numLights);
 
 	Material* material;
 };

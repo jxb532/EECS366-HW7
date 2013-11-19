@@ -17,6 +17,12 @@ public:
 		g = gg;
 		b = bb;
 	}
+	double operator[](const int &index) {
+		if (index == 0) return r;
+		if (index == 1) return g;
+		if (index == 2) return b;
+		return 0;
+	}
 	Color operator*(double num)
 	{
 		return Color(r * num, g * num, b * num);

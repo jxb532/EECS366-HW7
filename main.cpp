@@ -414,7 +414,7 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 
 	// calculate local intensity (I_local)
 	Vector3* V = &(*ray->direction * -1.0);
-	Color* localIntensity = obj->calculateIntensityAtPoint(intersect, V, norm, &lighting, lights);
+	Color* localIntensity = obj->calculateIntensityAtPoint(intersect, V, norm, lighting, lights);
 
 	//XXX
 	localIntensity = new Color(0.2, 0.2, 0.2);
