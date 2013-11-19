@@ -370,7 +370,6 @@ void redraw() {
 }
 
 // TODO clean up objects (delete-a-thon)
-// TODO figure out why ray->direction is getting destroyed
 bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 
 	// if depth of trace > 0
