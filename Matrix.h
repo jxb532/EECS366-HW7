@@ -17,7 +17,7 @@ public:
 	        Matrix(int _rows, int _cols);
 			Matrix(int _rows, int _cols, float** _matrix);
 			Matrix(int _rows, int _cols, float* _matrix);
-			Matrix(Vector3 &vector, int extraCols = 0, int extraRows = 0);
+			Matrix(Vector3 &vector, int extraCols, int extraRows);
 	        ~Matrix(void);
 
 	float   get(int i, int j);
@@ -33,4 +33,5 @@ public:
 
 	void    print(char* name);
 	float*  toArray();
+	Vector3* toVector3();
 };

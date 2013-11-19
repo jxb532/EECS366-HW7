@@ -23,7 +23,7 @@
 #define XY_STEP 1
 #define SLICES 100
 #define STACKS 100
-#define LAYOUT_FILE "samples/redsphere.rtl"
+#define LAYOUT_FILE "samples/red_sphere_and_teapot.rtl"
 
 using namespace std;
 
@@ -501,41 +501,57 @@ void initObjectsAndLights() {
 
 		Material* mat = new Material(&values[i][8], &values[i][11], &values[i][14], values[i][17], values[i][18], values[i][19], values[i][20], values[i][21], values[i][22], values[i][23]);
 		
-		
-		float scale = values[i][1];
-
-		Matrix* rotateX = rotateMatrix(values[i][2], 'x');
-		Matrix* rotateY = rotateMatrix(values[i][3], 'y');
-		Matrix* rotateZ = rotateMatrix(values[i][4], 'z');
-
-		Vector3* translate = new Vector3(values[i][5], values[i][6], values[i][7]);
+		// Transform matrices.
+		Matrix* tr = translateMatrix(values[i][4], values[i][5], values[i][6]);
+		Matrix* rx = rotateMatrix(values[i][1], 'x');
+		Matrix* ry = rotateMatrix(values[i][2], 'y');
+		Matrix* rz = rotateMatrix(values[i][3], 'z');
+		Matrix* sc = scaleMatrix(values[i][0]);
+		Matrix* t1 = *rz * sc;
+		Matrix* t2 = *rx * t1;
+		Matrix* vTransform = *ry * t2;
+		Matrix* pTransform = *tr * vTransform;
 
 		for (int j = 0; j < faces; j++) {
+			// Apply the transforms.
+			Vector3* v1 = new Vector3(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z);
+			Matrix* m1 = new Matrix(*v1, 1, 0);
+			Matrix* m2 = *vTransform * m1;
+			Vector3* vertex1 = m2->toVector3();
 
-			Vector3* vertex1 = new Vector3(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z);
-			Vector3* vertex2 = new Vector3(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z);
-			Vector3* vertex3 = new Vector3(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z);
+			Vector3* v2 = new Vector3(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z);
+			Matrix* m3 = new Matrix(*v2, 1, 0);
+			Matrix* m4 = *vTransform * m3;
+			Vector3* vertex2 = m4->toVector3();
 
-			Vector3* normal1 = new Vector3(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z);
-			Vector3* normal2 = new Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
-			Vector3* normal3 = new Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
+			Vector3* v3 = new Vector3(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z);
+			Matrix* m5 = new Matrix(*v3, 1, 0);
+			Matrix* m6 = *vTransform * m5;
+			Vector3* vertex3 = m6->toVector3();
 
-			// TODO: rotate, translate, and scale vertices and normals
-			Matrix* tr = translateMatrix(values[i][4], values[i][5], values[i][6]);
-			Matrix* rx = rotateMatrix(values[i][1], 'x');
-			Matrix* ry = rotateMatrix(values[i][2], 'y');
-			Matrix* rz = rotateMatrix(values[i][3], 'z');
-			Matrix* sc = scaleMatrix(values[i][0]);
+			Vector3* n1 = new Vector3(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z);
+			Matrix* m7 = new Matrix(*n1, 1, 0);
+			Matrix* m8 = *pTransform * m7;
+			Vector3* normal1 = m8->toVector3();
 
+			Vector3* n2 = new Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
+			Matrix* m9 = new Matrix(*n2, 1, 0);
+			Matrix* m10 = *pTransform * m9;
+			Vector3* normal2 = m10->toVector3();
+
+			Vector3* n3 = new Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
+			Matrix* m11 = new Matrix(*n3, 1, 0);
+			Matrix* m12 = *pTransform * m11;
+			Vector3* normal3 = m12->toVector3();
+
+			// Save the calculated polygon.
 			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
 
+			delete v1, v2, v3, n1, n2, n3, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12;
 			delete vertex1, vertex2, vertex3, normal1, normal2, normal3;
-			vertex1 = vertex2 = vertex3 = normal1 = normal2 = normal3 = NULL;
 		}
 
-		delete  rotateX, rotateY, rotateZ, translate;
-		rotateX = rotateY = rotateZ = NULL;
-		translate = NULL;
+		delete tr, rx, ry, rz, sc, t1, t2, vTransform, pTransform;
 	}
 }
 
