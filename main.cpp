@@ -7,7 +7,7 @@
 
 #include "frame_buffer.h"
 #include "primitives.h"
-#include "color.h"
+#include "Color.h"
 #include "Ray.h"
 #include "DisplayObject.h"
 #include "Light.h"
@@ -335,7 +335,7 @@ void	keyboard(unsigned char key, int x, int y)
 		glOrtho(-imagePlaneXY,imagePlaneXY,-imagePlaneXY,imagePlaneXY,0,imagePlaneZ);
 		break;
 	case 'r':
-		// TODO redraw the image
+		// TODO: redraw the image
 		break;
     default:
 		break;
@@ -423,7 +423,7 @@ bool shootRay(Ray *ray, int depth, int objectsRayIsInside) {
 					return true;
 				}
 				// if object is a refracting object
-				// TODO make sure a refracted ray does not immediatley intersect an object
+				// TODO: make sure a refracted ray does not immediatley intersect an object
 				if (obj->material->k_refractive > 0) {
 					Vector3 * refractionVector = NULL;
 					int refIndex = 0;
@@ -500,7 +500,7 @@ void initObjectsAndLights() {
 	// Add the meshes.
 	index = 0;
 	for (int i = lights + spheres; i < lights + spheres + meshes; i++) {
-		//TODO test this
+		//TODO: test this
 		meshReader(meshPaths[i - lights - spheres], 1.0);
 		totalFaces += faces;
 
@@ -525,7 +525,7 @@ void initObjectsAndLights() {
 			Vector3* normal2 = new Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
 			Vector3* normal3 = new Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
 
-			//TODO rotate, translate, and scale vertices and normals
+			//TODO: rotate, translate, and scale vertices and normals
 			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
 
 			delete vertex1, vertex2, vertex3, normal1, normal2, normal3;
