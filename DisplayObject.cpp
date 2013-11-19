@@ -3,25 +3,22 @@
 #include "DisplayObject.h";
 
 DisplayObject::~DisplayObject() {
-	//delete material;
+	// Nothing to delete.
 };
 
 
-// TODO: implement
 Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light* lights, int numLights) {
 	// TODO: normalize things
 
 	float temp;
 	Vector3 color (0, 0, 0);
 	for (int i = 0; i < numLights; i++) {
-			if (lights[i].type == Light::Point) {
+		if (lights[i].type == Light::Point) {
 			Vector3 lightPos (lights[i].position);
-			Vector3 L = (lightPos - *point);
-			Vector3 R = ((*N * 2.0) * N->dot(L)) - L;
-			Vector3 H = L + *V;
-			L = L / L.magnitude();
-			R = R / R.magnitude();
-			H = H / H.magnitude();
+
+			Vector3 L = (lightPos - *point); L.normalize();
+			Vector3 R = ((*N * 2.0) * N->dot(L)) - L; R.normalize();
+			Vector3 H = L + *V; H.normalize();
 		  
 			Vector3 Ia (material->ambient[0] * lights[i].color[0],
 						material->ambient[1] * lights[i].color[1],
@@ -41,6 +38,8 @@ Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vect
 						material->specular[2] * lights[i].color[2] * temp);
 
 			color = color + Ia + Id + Is;
+		} else if (lights[i].type == Light::Directional) {
+			// TODO: Implement.
 		}
 	}
 

@@ -26,6 +26,7 @@ public:
 	float   dot(const Vector3 &v);
 	float   magnitude();
 
+	void    normalize();
 	void    print();
 	void    print(char* name);
 	float   vector [LENGTH];

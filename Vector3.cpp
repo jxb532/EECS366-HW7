@@ -101,6 +101,13 @@ float Vector3::magnitude() {
 		this->vector[2] * this->vector[2]);
 }
 
+void Vector3::normalize() {
+	Vector3 temp = *this / this->magnitude();
+	vector[0] = temp[0];
+	vector[1] = temp[1];
+	vector[2] = temp[2];
+}
+
 void Vector3::print() {
 	printf("(%.2f, %.2f, %.2f)",
 		this->vector[0],
