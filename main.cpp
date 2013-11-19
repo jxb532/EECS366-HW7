@@ -483,60 +483,69 @@ void initObjectsAndLights() {
 
 		Material* mat = new Material(&values[i][8], &values[i][11], &values[i][14], values[i][17], values[i][18], values[i][19], values[i][20], values[i][21], values[i][22], values[i][23]);
 		
+		// Transform matrices.
 		float scale = values[i][0];
 		Vector3* translate = new Vector3(values[i][4], values[i][5], values[i][6]);
-
-		// Transform matrices.
-		Matrix* tr = translateMatrix(values[i][4], values[i][5], values[i][6]);
 		Matrix* rx = rotateMatrix(values[i][1], 'x');
 		Matrix* ry = rotateMatrix(values[i][2], 'y');
 		Matrix* rz = rotateMatrix(values[i][3], 'z');
-		//Matrix* sc = scaleMatrix(values[i][0]);
-		//Matrix* t1 = *rz * sc;
-		Matrix* t2 = *rx * rz;
-		Matrix* vTransform = *ry * t2;
-		//Matrix* pTransform = *tr * vTransform;
+		Matrix* ro = *rx * rz;
+		Matrix* tr = *ry * ro;
+		delete rx, ry, rz, ro;
+		rx = ry = rz = ro = NULL;
 
+		Vector3* temp;
+		Matrix *t1, *t2;
 		for (int j = 0; j < faces; j++) {
 			// Apply the transforms.
 			Vector3* v1 = new Vector3(vertList[faceList[j].v1].x * scale, vertList[faceList[j].v1].y * scale, vertList[faceList[j].v1].z * scale);
-			Matrix* m1 = new Matrix(*v1, 0);
-			Matrix* m2 = *vTransform * m1;
-			Vector3* vertex1 = &(*m2->toVector3() + *translate);
+			t1 = new Matrix(*v1, 0);
+			t2 = *tr * t1;
+			temp = t2->toVector3();
+			Vector3* vertex1 = &(*temp + *translate);
+			delete v1, temp, t1, t2;
 
 			Vector3* v2 = new Vector3(vertList[faceList[j].v2].x * scale, vertList[faceList[j].v2].y * scale, vertList[faceList[j].v2].z * scale);
-			Matrix* m3 = new Matrix(*v2, 0);
-			Matrix* m4 = *vTransform * m3;
-			Vector3* vertex2 = &(*m4->toVector3() + *translate);
+			t1 = new Matrix(*v2, 0);
+			t2 = *tr * t1;
+			temp = t2->toVector3();
+			Vector3* vertex2 = &(*temp + *translate);
+			delete v2, temp, t1, t2;
 
 			Vector3* v3 = new Vector3(vertList[faceList[j].v3].x * scale, vertList[faceList[j].v3].y * scale, vertList[faceList[j].v3].z * scale);
-			Matrix* m5 = new Matrix(*v3, 0);
-			Matrix* m6 = *vTransform * m5;
-			Vector3* vertex3 = &(*m6->toVector3() + *translate);
+			t1 = new Matrix(*v3, 0);
+			t2 = *tr * t1;
+			temp = t2->toVector3();
+			Vector3* vertex3 = &(*temp + *translate);
+			delete v3, temp, t1, t2;
 
 			Vector3* n1 = new Vector3(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z);
-			Matrix* m7 = new Matrix(*n1, 0);
-			Matrix* m8 = *vTransform * m7;
-			Vector3* normal1 = &(*m8->toVector3() + *translate);
+			t1 = new Matrix(*n1, 0);
+			t2 = *tr * t1;
+			temp = t2->toVector3();
+			Vector3* normal1 = &(*temp + *translate);
+			delete n1, temp, t1, t2;
 
 			Vector3* n2 = new Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
-			Matrix* m9 = new Matrix(*n2, 0);
-			Matrix* m10 = *vTransform * m9;
-			Vector3* normal2 = &(*m10->toVector3() + *translate);
+			t1 = new Matrix(*n2, 0);
+			t2 = *tr * t1;
+			temp = t2->toVector3();
+			Vector3* normal2 = &(*temp + *translate);
+			delete n2, temp, t1, t2;
 
 			Vector3* n3 = new Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
-			Matrix* m11 = new Matrix(*n3, 0);
-			Matrix* m12 = *vTransform * m11;
-			Vector3* normal3 = &(*m12->toVector3() + *translate);
+			t1 = new Matrix(*n3, 0);
+			t2 = *tr * t1;
+			temp = t2->toVector3();
+			Vector3* normal3 = &(*temp + *translate);
+			delete n3, temp, t1, t2;
 
 			// Save the calculated polygon.
 			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
-
-			delete v1, v2, v3, n1, n2, n3, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12;
-			delete vertex1, vertex2, vertex3, normal1, normal2, normal3;
 		}
 
-		delete translate, tr, rx, ry, rz, t2, vTransform;
+		delete translate, tr;
+		translate = NULL; tr = NULL;
 	}
 }
 
