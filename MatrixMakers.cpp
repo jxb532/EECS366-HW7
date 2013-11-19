@@ -77,12 +77,11 @@ Matrix* translateMatrix(float x, float y, float z) {
 
 Matrix* scaleMatrix(float scale) {
 	float matrix[] = {
-		scale, 0, 0, 0,
-		0, scale, 0, 0,
-		0, 0, scale, 0,
-		0, 0, 0, 1
+		scale, 0, 0,
+		0, scale, 0,
+		0, 0, scale,
 	};
-	return new Matrix(4, 4, matrix);
+	return new Matrix(3, 3, matrix);
 }
 
 Matrix* perspectiveMatrix(Vector3 prp, Vector3 vp, float s, float t, float d) {

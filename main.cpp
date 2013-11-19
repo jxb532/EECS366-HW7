@@ -497,32 +497,32 @@ void initObjectsAndLights() {
 		for (int j = 0; j < faces; j++) {
 			// Apply the transforms.
 			Vector3* v1 = new Vector3(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z);
-			Matrix* m1 = new Matrix(*v1, 1, 0);
+			Matrix* m1 = new Matrix(*v1, 0);
 			Matrix* m2 = *vTransform * m1;
 			Vector3* vertex1 = m2->toVector3();
 
 			Vector3* v2 = new Vector3(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z);
-			Matrix* m3 = new Matrix(*v2, 1, 0);
+			Matrix* m3 = new Matrix(*v2, 0);
 			Matrix* m4 = *vTransform * m3;
 			Vector3* vertex2 = m4->toVector3();
 
 			Vector3* v3 = new Vector3(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z);
-			Matrix* m5 = new Matrix(*v3, 1, 0);
+			Matrix* m5 = new Matrix(*v3, 0);
 			Matrix* m6 = *vTransform * m5;
 			Vector3* vertex3 = m6->toVector3();
 
 			Vector3* n1 = new Vector3(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z);
-			Matrix* m7 = new Matrix(*n1, 1, 0);
+			Matrix* m7 = new Matrix(*n1, 0);
 			Matrix* m8 = *pTransform * m7;
 			Vector3* normal1 = m8->toVector3();
 
 			Vector3* n2 = new Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
-			Matrix* m9 = new Matrix(*n2, 1, 0);
+			Matrix* m9 = new Matrix(*n2, 0);
 			Matrix* m10 = *pTransform * m9;
 			Vector3* normal2 = m10->toVector3();
 
 			Vector3* n3 = new Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
-			Matrix* m11 = new Matrix(*n3, 1, 0);
+			Matrix* m11 = new Matrix(*n3, 0);
 			Matrix* m12 = *pTransform * m11;
 			Vector3* normal3 = m12->toVector3();
 

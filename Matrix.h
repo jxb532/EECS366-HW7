@@ -17,7 +17,7 @@ public:
 	        Matrix(int _rows, int _cols);
 			Matrix(int _rows, int _cols, float** _matrix);
 			Matrix(int _rows, int _cols, float* _matrix);
-			Matrix(Vector3 &vector, int extraCols, int extraRows);
+			Matrix(Vector3 &vector, int extraRows);
 	        ~Matrix(void);
 
 	float   get(int i, int j);
