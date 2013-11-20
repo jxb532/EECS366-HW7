@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include "glut.h"
-//#include <GL/gl.h>
-//#include <GL/glu.h>
+#include "glut.h"
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <math.h>
 
 #include "frame_buffer.h"
@@ -23,7 +23,7 @@
 #define XY_STEP 1
 #define SLICES 100
 #define STACKS 100
-#define LAYOUT_FILE "samples/red_sphere_and_teapot.rtl"
+#define LAYOUT_FILE "samples/redsphere.rtl"
 
 using namespace std;
 
@@ -171,61 +171,61 @@ void meshReader (char *filename,int sign)
 
 }
 
-//void drawRect(double x, double y, double w, double h)
-//{
-//	glVertex2f(x,y);
-//	glVertex2f(x+w,y);
-//	glVertex2f(x+w,y+h);
-//	glVertex2f(x, y+h);
-//}
+void drawRect(double x, double y, double w, double h)
+{
+	glVertex2f(x,y);
+	glVertex2f(x+w,y);
+	glVertex2f(x+w,y+h);
+	glVertex2f(x, y+h);
+}
 
 
 // The display function. It is called whenever the window needs
 // redrawing (ie: overlapping window moves, resize, maximize)
 // You should redraw your polygons here
-//void	display(void)
-//{
-//    // Clear the background
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//
-//	double w = 10/double(fb->GetWidth());
-//	double h = 10/double(fb->GetHeight());
-//	
-//	Color cl;
-//	glColor3f(0,0,1);
-//	
-//	glBegin(GL_QUADS);
-//
-//	printf("width %d, height %d\n", fb->GetWidth(), fb->GetHeight());
-//
-//	for(int y = 0; y < fb->GetHeight(); y++)
-//	{
-//		for(int x = 0; x < fb->GetHeight(); x++)
-//		{
-//			cl = fb->buffer[x][y].color;
-//			glColor3f(cl.r, cl.g, cl.b);
-//
-//			drawRect(w*x, h*y, w, h);
-//		}
-//	}
-//
-//	glEnd();
-//    glutSwapBuffers();
-//}
+void	display(void)
+{
+    // Clear the background
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	double w = 10/double(fb->GetWidth());
+	double h = 10/double(fb->GetHeight());
+	
+	Color cl;
+	glColor3f(0,0,1);
+	
+	glBegin(GL_QUADS);
+
+	printf("width %d, height %d\n", fb->GetWidth(), fb->GetHeight());
+
+	for(int y = 0; y < fb->GetHeight(); y++)
+	{
+		for(int x = 0; x < fb->GetHeight(); x++)
+		{
+			cl = fb->buffer[x][y].color;
+			glColor3f(cl.r, cl.g, cl.b);
+
+			drawRect(w*x, h*y, w, h);
+		}
+	}
+
+	glEnd();
+    glutSwapBuffers();
+}
 
 
 // This function is called whenever the window is resized. 
 // Parameters are the new dimentions of the window
-//void	resize(int x,int y)
-//{
-//    glViewport(0,0,x,y);
-//    window_width = x;
-//    window_height = y;
-//    
-//    printf("Resized to %d %d\n",x,y);
-//}
+void	resize(int x,int y)
+{
+    glViewport(0,0,x,y);
+    window_width = x;
+    window_height = y;
+    
+    printf("Resized to %d %d\n",x,y);
+}
 
 
 // This function is called whenever the mouse is pressed or released
@@ -285,7 +285,7 @@ void	keyboard(unsigned char key, int x, int y)
     }
 
     // Schedule a new display event
-    //glutPostRedisplay();
+    glutPostRedisplay();
 }
 
 
@@ -297,31 +297,31 @@ int main(int argc, char* argv[])
 	BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
 
     // Initialize GLUT
-    //glutInit(&argc, argv);
-    //glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    //glutCreateWindow("Raytracer");
-    //glutDisplayFunc(display);
-    //glutReshapeFunc(resize);
-    //glutMouseFunc(mouseButton);
-    //glutMotionFunc(mouseMotion);
-    //glutKeyboardFunc(keyboard);
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutCreateWindow("Raytracer");
+    glutDisplayFunc(display);
+    glutReshapeFunc(resize);
+    glutMouseFunc(mouseButton);
+    glutMotionFunc(mouseMotion);
+    glutKeyboardFunc(keyboard);
 
     // Initialize GL
- //   glMatrixMode(GL_PROJECTION);
- //   glLoadIdentity();
-	//glOrtho(0,10,0,10,-10000,10000);
- //   glMatrixMode(GL_MODELVIEW);
- //   glLoadIdentity();
- //   glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_POLYGON_SMOOTH);
-	//glEnable(GL_POINT_SMOOTH);
-	//glEnable(GL_LINE_SMOOTH);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+	glOrtho(0,10,0,10,-10000,10000);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_POLYGON_SMOOTH);
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_LINE_SMOOTH);
 
 	initObjectsAndLights();
 	redraw();
 
     // Switch to main loop
-    //glutMainLoop();
+    glutMainLoop();
     return 0;        
 }
 
