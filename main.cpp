@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include "glut.h"
-//#include <GL/gl.h>
-//#include <GL/glu.h>
+#include "glut.h"
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <math.h>
 
 #include "frame_buffer.h"
@@ -23,7 +23,7 @@
 #define XY_STEP 1
 #define SLICES 100
 #define STACKS 100
-#define LAYOUT_FILE "samples/redsphere.rtl"
+#define LAYOUT_FILE "samples/red_sphere_and_blue_sphere.rtl"
 
 using namespace std;
 
@@ -54,9 +54,11 @@ int totalFaces = 0;
 point *vertList, *normList; // Vertex and Normal Lists
 faceStruct *faceList;	    // Face List
 DisplayObject *objects;
-DisplayObject *sphereObjects;
-DisplayObject *polygonObjects;
-Light *lighting;
+//DisplayObject *sphereObjects;
+//DisplayObject *polygonObjects;
+vector<Sphere*> sphereObjects;
+vector<Polygon*> polygonObjects;
+vector<Light*> lighting;
 
 // The mesh reader itself
 // It can read *very* simple obj files
@@ -171,61 +173,61 @@ void meshReader (char *filename,int sign)
 
 }
 
-//void drawRect(double x, double y, double w, double h)
-//{
-//	glVertex2f(x,y);
-//	glVertex2f(x+w,y);
-//	glVertex2f(x+w,y+h);
-//	glVertex2f(x, y+h);
-//}
+void drawRect(double x, double y, double w, double h)
+{
+	glVertex2f(x,y);
+	glVertex2f(x+w,y);
+	glVertex2f(x+w,y+h);
+	glVertex2f(x, y+h);
+}
 
 
 // The display function. It is called whenever the window needs
 // redrawing (ie: overlapping window moves, resize, maximize)
 // You should redraw your polygons here
-//void	display(void)
-//{
-//    // Clear the background
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//
-//	double w = 10/double(fb->GetWidth());
-//	double h = 10/double(fb->GetHeight());
-//	
-//	Color cl;
-//	glColor3f(0,0,1);
-//	
-//	glBegin(GL_QUADS);
-//
-//	printf("width %d, height %d\n", fb->GetWidth(), fb->GetHeight());
-//
-//	for(int y = 0; y < fb->GetHeight(); y++)
-//	{
-//		for(int x = 0; x < fb->GetHeight(); x++)
-//		{
-//			cl = fb->buffer[x][y].color;
-//			glColor3f(cl.r, cl.g, cl.b);
-//
-//			drawRect(w*x, h*y, w, h);
-//		}
-//	}
-//
-//	glEnd();
-//    glutSwapBuffers();
-//}
+void	display(void)
+{
+    // Clear the background
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	double w = 10/double(fb->GetWidth());
+	double h = 10/double(fb->GetHeight());
+	
+	Color cl;
+	glColor3f(0,0,1);
+	
+	glBegin(GL_QUADS);
+
+	printf("width %d, height %d\n", fb->GetWidth(), fb->GetHeight());
+
+	for(int y = 0; y < fb->GetHeight(); y++)
+	{
+		for(int x = 0; x < fb->GetHeight(); x++)
+		{
+			cl = fb->buffer[x][y].color;
+			glColor3f(cl.r, cl.g, cl.b);
+
+			drawRect(w*x, h*y, w, h);
+		}
+	}
+
+	glEnd();
+    glutSwapBuffers();
+}
 
 
 // This function is called whenever the window is resized. 
 // Parameters are the new dimentions of the window
-//void	resize(int x,int y)
-//{
-//    glViewport(0,0,x,y);
-//    window_width = x;
-//    window_height = y;
-//    
-//    printf("Resized to %d %d\n",x,y);
-//}
+void	resize(int x,int y)
+{
+    glViewport(0,0,x,y);
+    window_width = x;
+    window_height = y;
+    
+    printf("Resized to %d %d\n",x,y);
+}
 
 
 // This function is called whenever the mouse is pressed or released
@@ -256,7 +258,7 @@ void	keyboard(unsigned char key, int x, int y)
 		exit(1);
 		break;
 	case '-':
-		fb->Resize(fb->GetHeight()/2, fb->GetWidth()/2);
+		fb->Resize(fb->GetHeight()/2 < 1 ? 1 : fb->GetHeight()/2, fb->GetWidth()/2 < 1 ? 1 : fb->GetWidth()/2);
 		BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
 		break;
 	case '=':
@@ -296,32 +298,32 @@ int main(int argc, char* argv[])
 
 	BresenhamLine(fb, fb->GetWidth()*0.1, fb->GetHeight()*0.1, fb->GetWidth()*0.9, fb->GetHeight()*0.9, Color(1,0,0));
 
-    // Initialize GLUT
-    //glutInit(&argc, argv);
-    //glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    //glutCreateWindow("Raytracer");
-    //glutDisplayFunc(display);
-    //glutReshapeFunc(resize);
-    //glutMouseFunc(mouseButton);
-    //glutMotionFunc(mouseMotion);
-    //glutKeyboardFunc(keyboard);
-
-    // Initialize GL
- //   glMatrixMode(GL_PROJECTION);
- //   glLoadIdentity();
-	//glOrtho(0,10,0,10,-10000,10000);
- //   glMatrixMode(GL_MODELVIEW);
- //   glLoadIdentity();
- //   glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_POLYGON_SMOOTH);
-	//glEnable(GL_POINT_SMOOTH);
-	//glEnable(GL_LINE_SMOOTH);
-
 	initObjectsAndLights();
 	redraw();
 
+    // Initialize GLUT
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutCreateWindow("Raytracer");
+    glutDisplayFunc(display);
+    glutReshapeFunc(resize);
+    glutMouseFunc(mouseButton);
+    glutMotionFunc(mouseMotion);
+    glutKeyboardFunc(keyboard);
+
+    // Initialize GL
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+	glOrtho(0,10,0,10,-10000,10000);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_POLYGON_SMOOTH);
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_LINE_SMOOTH);
+
     // Switch to main loop
-    //glutMainLoop();
+    glutMainLoop();
     return 0;        
 }
 
@@ -345,7 +347,7 @@ void redraw() {
 }
 
 // TODO clean up objects (delete-a-thon)
-bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
+bool shootRay(Ray *ray, int depth, int objectsRayIsInside) {
 
 	// if depth of trace > 0
 	if (depth < 1) {
@@ -357,7 +359,7 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 	Vector3* intersect = NULL;
 	
 	for (int i = 0; i < spheres + totalFaces; i++) {
-		DisplayObject* currentObj = i < spheres ? &sphereObjects[i] : &polygonObjects[i - spheres];
+		DisplayObject* currentObj = i < spheres ? dynamic_cast<DisplayObject*>(sphereObjects[i]) : dynamic_cast<DisplayObject*>(polygonObjects[i - spheres]);
 		Vector3* curIntersect = new Vector3();
 		float* dist = new float;
 
@@ -368,7 +370,7 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 				lowestDist = *dist;
 				delete dist;
 
-				delete obj;
+				//delete obj;
 				obj = currentObj;
 
 				delete intersect;
@@ -474,24 +476,30 @@ void initObjectsAndLights() {
 	parseLayoutFile(LAYOUT_FILE);
 
 	// Add the lights.
-	lighting = static_cast<Light*>( ::operator new ( sizeof Light * lights ) );
+	//lighting = static_cast<Light*>( ::operator new ( sizeof Light * lights ) );
 	int index = 0;
-	for (int i = 0; i < lights; i++) {
-		new (&lighting[index++]) Light((int)values[i][0], &values[i][1], &values[i][4]);
+	for (vector<Light*>::size_type i = 0; i < lights; i++) {
+		//new (&lighting[index++]) Light((int)values[i][0], &values[i][1], &values[i][4]);
+		Light* light = new Light((int)values[i][0], &values[i][1], &values[i][4]);
+		lighting.push_back(light);
 	}
 
 	// Add the spheres.
-	sphereObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Sphere * spheres ) );
+	//sphereObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Sphere * spheres ) );
+	//sphereObjects = new Sphere[spheres];
+	//vector<Sphere> sphereObjects
 	index = 0;
-	for (int i = lights; i < lights + spheres; i++) {
+	for (vector<DisplayObject*>::size_type i = lights; i < lights + spheres; i++) {
 		Material* mat = new Material(&values[i][4], &values[i][7], &values[i][10], values[i][13], values[i][14], values[i][15], values[i][16], values[i][17], values[i][18], values[i][19]);
-		new (&sphereObjects[index++]) Sphere(&values[i][0], values[i][3], mat);
+		//new (&sphereObjects[index++]) Sphere(&values[i][0], values[i][3], mat);
+		Sphere* sphere = new Sphere(&values[i][0], values[i][3], mat);
+		sphereObjects.push_back(sphere);
 	}
 	
 	// Add the meshes.
-	polygonObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Polygon * spheres ) );
+	//polygonObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Polygon * spheres ) );
 	index = 0;
-	for (int i = lights + spheres; i < lights + spheres + meshes; i++) {
+	for (vector<DisplayObject*>::size_type i = lights + spheres; i < lights + spheres + meshes; i++) {
 		meshReader(meshPaths[i - lights - spheres], 1.0);
 		totalFaces += faces;
 
@@ -520,7 +528,9 @@ void initObjectsAndLights() {
 			Vector3 normal3 = rotscaletrans(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z, tr, scale);
 
 			// Save the calculated polygon.
-			new (&polygonObjects[index++]) Polygon(&vertex1, &vertex2, &vertex3, &normal1, &normal2, &normal3, mat);
+			//new (&polygonObjects[index++]) Polygon(&vertex1, &vertex2, &vertex3, &normal1, &normal2, &normal3, mat);
+			Polygon* poly = new Polygon(&vertex1, &vertex2, &vertex3, &normal1, &normal2, &normal3, mat);
+			polygonObjects.push_back(poly);
 		}
 
 		delete translate, tr;
