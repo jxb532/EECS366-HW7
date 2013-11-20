@@ -7,9 +7,8 @@
 #include "Vector3.h"
 
 class Matrix {
-private:
-	float** matrix;
 public:
+	float** matrix;
 	int     rows;
 	int     cols;
 

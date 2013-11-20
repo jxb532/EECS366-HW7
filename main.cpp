@@ -452,6 +452,26 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 	return true;
 }
 
+Vector3 rotscaletrans(float x, float y, float z, Matrix* rot, float scale, Vector3* trans) {
+	float sx = scale * x;
+	float sy = scale * y;
+	float sz = scale * z;
+	return Vector3(
+		rot->matrix[0][0] * sx + rot->matrix[0][1] * sy + rot->matrix[0][2] * sz + trans->vector[0],
+		rot->matrix[1][0] * sx + rot->matrix[1][1] * sy + rot->matrix[1][2] * sz + trans->vector[1],
+		rot->matrix[2][0] * sx + rot->matrix[2][1] * sy + rot->matrix[2][2] * sz + trans->vector[2]);
+}
+
+Vector3 rotscaletrans(float x, float y, float z, Matrix* rot, float scale) {
+	float sx = scale * x;
+	float sy = scale * y;
+	float sz = scale * z;
+	return Vector3(
+		rot->matrix[0][0] * sx + rot->matrix[0][1] * sy + rot->matrix[0][2] * sz,
+		rot->matrix[1][0] * sx + rot->matrix[1][1] * sy + rot->matrix[1][2] * sz,
+		rot->matrix[2][0] * sx + rot->matrix[2][1] * sy + rot->matrix[2][2] * sz);
+}
+
 void initObjectsAndLights() {
 
 	parseLayoutFile(LAYOUT_FILE);
@@ -498,47 +518,12 @@ void initObjectsAndLights() {
 		Matrix *t1, *t2;
 		for (int j = 0; j < faces; j++) {
 			// Apply the transforms.
-			Vector3* v1 = new Vector3(vertList[faceList[j].v1].x * scale, vertList[faceList[j].v1].y * scale, vertList[faceList[j].v1].z * scale);
-			t1 = new Matrix(*v1, 0);
-			t2 = *tr * t1;
-			temp = t2->toVector3();
-			Vector3* vertex1 = &(*temp + *translate);
-			delete v1, temp, t1, t2;
-
-			Vector3* v2 = new Vector3(vertList[faceList[j].v2].x * scale, vertList[faceList[j].v2].y * scale, vertList[faceList[j].v2].z * scale);
-			t1 = new Matrix(*v2, 0);
-			t2 = *tr * t1;
-			temp = t2->toVector3();
-			Vector3* vertex2 = &(*temp + *translate);
-			delete v2, temp, t1, t2;
-
-			Vector3* v3 = new Vector3(vertList[faceList[j].v3].x * scale, vertList[faceList[j].v3].y * scale, vertList[faceList[j].v3].z * scale);
-			t1 = new Matrix(*v3, 0);
-			t2 = *tr * t1;
-			temp = t2->toVector3();
-			Vector3* vertex3 = &(*temp + *translate);
-			delete v3, temp, t1, t2;
-
-			Vector3* n1 = new Vector3(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z);
-			t1 = new Matrix(*n1, 0);
-			t2 = *tr * t1;
-			temp = t2->toVector3();
-			Vector3* normal1 = &(*temp + *translate);
-			delete n1, temp, t1, t2;
-
-			Vector3* n2 = new Vector3(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z);
-			t1 = new Matrix(*n2, 0);
-			t2 = *tr * t1;
-			temp = t2->toVector3();
-			Vector3* normal2 = &(*temp + *translate);
-			delete n2, temp, t1, t2;
-
-			Vector3* n3 = new Vector3(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z);
-			t1 = new Matrix(*n3, 0);
-			t2 = *tr * t1;
-			temp = t2->toVector3();
-			Vector3* normal3 = &(*temp + *translate);
-			delete n3, temp, t1, t2;
+			Vector3* vertex1 = &rotscaletrans(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z, tr, scale, translate);
+			Vector3* vertex2 = &rotscaletrans(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z, tr, scale, translate);
+			Vector3* vertex3 = &rotscaletrans(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z, tr, scale, translate);
+			Vector3* normal1 = &rotscaletrans(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z, tr, scale);
+			Vector3* normal2 = &rotscaletrans(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z, tr, scale);
+			Vector3* normal3 = &rotscaletrans(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z, tr, scale);
 
 			// Save the calculated polygon.
 			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
