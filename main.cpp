@@ -552,7 +552,7 @@ bool parseLayoutFile(char* path) {
 	char type;
 	int index, count;
 
-	while (!fp.eof()) {
+	while (!fp.eof() && (curLight < lights || curSphere < spheres || curMesh < meshes)) {
 		fp >> type;
 		switch (type) {
 		case 'L':
@@ -570,11 +570,6 @@ bool parseLayoutFile(char* path) {
 			index = lights + spheres + curMesh++;
 			break;
 		default:
-			cout << "Failed to parse " << path << endl;
-			return false;
-		}
-
-		if (curLight > lights || curSphere > spheres || curMesh > meshes) {
 			cout << "Failed to parse " << path << endl;
 			return false;
 		}
