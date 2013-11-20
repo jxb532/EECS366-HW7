@@ -456,8 +456,7 @@ Vector3 rotscaletrans(float x, float y, float z, Matrix* rot, float scale, Vecto
 	float sx = scale * x;
 	float sy = scale * y;
 	float sz = scale * z;
-	return Vector3(
-		rot->matrix[0][0] * sx + rot->matrix[0][1] * sy + rot->matrix[0][2] * sz + trans->vector[0],
+	return Vector3(rot->matrix[0][0] * sx + rot->matrix[0][1] * sy + rot->matrix[0][2] * sz + trans->vector[0],
 		rot->matrix[1][0] * sx + rot->matrix[1][1] * sy + rot->matrix[1][2] * sz + trans->vector[1],
 		rot->matrix[2][0] * sx + rot->matrix[2][1] * sy + rot->matrix[2][2] * sz + trans->vector[2]);
 }
@@ -466,36 +465,31 @@ Vector3 rotscaletrans(float x, float y, float z, Matrix* rot, float scale) {
 	float sx = scale * x;
 	float sy = scale * y;
 	float sz = scale * z;
-	return Vector3(
-		rot->matrix[0][0] * sx + rot->matrix[0][1] * sy + rot->matrix[0][2] * sz,
+	return Vector3(rot->matrix[0][0] * sx + rot->matrix[0][1] * sy + rot->matrix[0][2] * sz,
 		rot->matrix[1][0] * sx + rot->matrix[1][1] * sy + rot->matrix[1][2] * sz,
 		rot->matrix[2][0] * sx + rot->matrix[2][1] * sy + rot->matrix[2][2] * sz);
 }
 
 void initObjectsAndLights() {
-
 	parseLayoutFile(LAYOUT_FILE);
 
-	lighting = static_cast<Light*>( ::operator new ( sizeof Light * lights ) );
-
 	// Add the lights.
+	lighting = static_cast<Light*>( ::operator new ( sizeof Light * lights ) );
 	int index = 0;
 	for (int i = 0; i < lights; i++) {
 		new (&lighting[index++]) Light((int)values[i][0], &values[i][1], &values[i][4]);
 	}
 
-	sphereObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Sphere * spheres ) );
-
 	// Add the spheres.
+	sphereObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Sphere * spheres ) );
 	index = 0;
 	for (int i = lights; i < lights + spheres; i++) {
 		Material* mat = new Material(&values[i][4], &values[i][7], &values[i][10], values[i][13], values[i][14], values[i][15], values[i][16], values[i][17], values[i][18], values[i][19]);
 		new (&sphereObjects[index++]) Sphere(&values[i][0], values[i][3], mat);
 	}
 	
-	polygonObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Polygon * spheres ) );
-
 	// Add the meshes.
+	polygonObjects = static_cast<DisplayObject*>( ::operator new ( sizeof Polygon * spheres ) );
 	index = 0;
 	for (int i = lights + spheres; i < lights + spheres + meshes; i++) {
 		meshReader(meshPaths[i - lights - spheres], 1.0);
@@ -518,15 +512,15 @@ void initObjectsAndLights() {
 		Matrix *t1, *t2;
 		for (int j = 0; j < faces; j++) {
 			// Apply the transforms.
-			Vector3* vertex1 = &rotscaletrans(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z, tr, scale, translate);
-			Vector3* vertex2 = &rotscaletrans(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z, tr, scale, translate);
-			Vector3* vertex3 = &rotscaletrans(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z, tr, scale, translate);
-			Vector3* normal1 = &rotscaletrans(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z, tr, scale);
-			Vector3* normal2 = &rotscaletrans(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z, tr, scale);
-			Vector3* normal3 = &rotscaletrans(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z, tr, scale);
+			Vector3 vertex1 = rotscaletrans(vertList[faceList[j].v1].x, vertList[faceList[j].v1].y, vertList[faceList[j].v1].z, tr, scale, translate);
+			Vector3 vertex2 = rotscaletrans(vertList[faceList[j].v2].x, vertList[faceList[j].v2].y, vertList[faceList[j].v2].z, tr, scale, translate);
+			Vector3 vertex3 = rotscaletrans(vertList[faceList[j].v3].x, vertList[faceList[j].v3].y, vertList[faceList[j].v3].z, tr, scale, translate);
+			Vector3 normal1 = rotscaletrans(normList[faceList[j].v1].x, normList[faceList[j].v1].y, normList[faceList[j].v1].z, tr, scale);
+			Vector3 normal2 = rotscaletrans(normList[faceList[j].v2].x, normList[faceList[j].v2].y, normList[faceList[j].v2].z, tr, scale);
+			Vector3 normal3 = rotscaletrans(normList[faceList[j].v3].x, normList[faceList[j].v3].y, normList[faceList[j].v3].z, tr, scale);
 
 			// Save the calculated polygon.
-			new (&polygonObjects[index++]) Polygon(vertex1, vertex2, vertex3, normal1, normal2, normal3, mat);
+			new (&polygonObjects[index++]) Polygon(&vertex1, &vertex2, &vertex3, &normal1, &normal2, &normal3, mat);
 		}
 
 		delete translate, tr;
@@ -585,12 +579,13 @@ bool parseLayoutFile(char* path) {
 			return false;
 		}
 
-		values[index] = new float [count];
+		values[index] = new float[count];
 		for (int i = 0; i < count; i++) {
 			fp >> values[index][i];
 		}
 	}
 
 	fp.close();
+	cout << "Successfully read " << path << endl;
 	return true;
 }
