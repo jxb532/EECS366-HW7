@@ -61,7 +61,7 @@ Sphere::~Sphere() {
 
 
 // Adapted from http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection
-bool Sphere::intersects(Ray* _ray, Vector3* intersect, float* dist) {
+bool Sphere::intersects(Ray* _ray, Vector3* intersect, float &dist) {
 	// transform ray into object space
 	Vector3 rayOrigin = *_ray->origin - *this->center;
 	Ray ray = Ray(&rayOrigin, _ray->direction);
@@ -109,13 +109,13 @@ bool Sphere::intersects(Ray* _ray, Vector3* intersect, float* dist) {
     // if t0 is less than zero, the intersection point is at t1
     if (t0 < 0) {
 		*intersect = *_ray->origin + (*_ray->direction * t1);
-		*dist = (*intersect - *_ray->origin).magnitude();
+		dist = (*intersect - *_ray->origin).magnitude();
         return true;
 
 	// else the intersection point is at t0
     } else {
         *intersect = *_ray->origin + (*_ray->direction * t0);
-		*dist = (*intersect - *_ray->origin).magnitude();
+		dist = (*intersect - *_ray->origin).magnitude();
         return true;
     }
 }
@@ -140,7 +140,7 @@ Polygon::~Polygon() {
 	delete v1, v2, v3, n1, n2, n3;
 }
 
-bool Polygon::intersects(Ray* _ray, Vector3* intersect, float* dist) {
+bool Polygon::intersects(Ray* _ray, Vector3* intersect, float &dist) {
 	Vector3 n = (*n2 - *n1).cross(&(*n3 - *n1));
 
 	if (n.dot(_ray->direction) == 0) return false;
@@ -148,7 +148,7 @@ bool Polygon::intersects(Ray* _ray, Vector3* intersect, float* dist) {
 	if (t < 0) return false;
 
 	intersect = &(*_ray->origin + (*_ray->direction * t));
-	*dist = (*intersect - *_ray->origin).magnitude();
+	dist = (*intersect - *_ray->origin).magnitude();
 
 	Vector3 edge0 = *v2 - *v1;
 	Vector3 edge1 = *v3 - *v2;
