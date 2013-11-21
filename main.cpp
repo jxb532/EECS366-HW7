@@ -60,115 +60,107 @@ Light *lighting;
 
 // The mesh reader itself
 // It can read *very* simple obj files
-void meshReader (char *filename,int sign)
-{
-  float x,y,z,len;
-  int i;
-  char letter;
-  point v1,v2,crossP;
-  int ix,iy,iz;
-  int *normCount;
-  FILE *fp;
+bool meshReader (char *filename, int sign) {
+	float x,y,z,len;
+	int i;
+	char letter;
+	point v1,v2,crossP;
+	int ix,iy,iz;
+	int *normCount;
+	FILE *fp;
 
-  fp = fopen(filename, "r");
-  if (fp == NULL) { 
-    printf("Cannot open %s\n!", filename);
-    exit(0);
-  }
-
-  // Count the number of vertices and faces
-  while(!feof(fp))
-    {
-      fscanf(fp,"%c %f %f %f\n",&letter,&x,&y,&z);
-      if (letter == 'v')
-	{
-	  verts++;
+	fp = fopen(filename, "r");
+	if (fp == NULL) { 
+		printf("Cannot open %s\n!", filename);
+		return false;
 	}
-      else
-	{
-	  faces++;
+
+	// Count the number of vertices and faces
+	while(!feof(fp)){
+		fscanf(fp,"%c %f %f %f\n",&letter,&x,&y,&z);
+		if (letter == 'v') {
+			verts++;
+		} else {
+			faces++;
+		}
 	}
-    }
 
-  fclose(fp);
+	fclose(fp);
 
-  printf("verts : %d\n", verts);
-  printf("faces : %d\n", faces);
+	printf("verts : %d\n", verts);
+	printf("faces : %d\n", faces);
 
-  // Dynamic allocation of vertex and face lists
-  faceList = (faceStruct *)malloc(sizeof(faceStruct)*faces);
-  vertList = (point *)malloc(sizeof(point)*verts);
-  normList = (point *)malloc(sizeof(point)*verts);
+	// Dynamic allocation of vertex and face lists
+	faceList = (faceStruct *)malloc(sizeof(faceStruct)*faces);
+	vertList = (point *)malloc(sizeof(point)*verts);
+	normList = (point *)malloc(sizeof(point)*verts);
 
-  fp = fopen(filename, "r");
+	// Reopen to start at beginning
+	fp = fopen(filename, "r");
 
-  // Read the veritces
-  for(i = 0;i < verts;i++)
-    {
-      fscanf(fp,"%c %f %f %f\n",&letter,&x,&y,&z);
-      vertList[i].x = x;
-      vertList[i].y = y;
-      vertList[i].z = z;
-    }
+	// Read the vertices
+	for(i = 0;i < verts;i++) {
+		fscanf(fp,"%c %f %f %f\n",&letter,&x,&y,&z);
+		vertList[i].x = x;
+		vertList[i].y = y;
+		vertList[i].z = z;
+	}
 
-  // Read the faces
-  for(i = 0;i < faces;i++)
-    {
-      fscanf(fp,"%c %d %d %d\n",&letter,&ix,&iy,&iz);
-      faceList[i].v1 = ix - 1;
-      faceList[i].v2 = iy - 1;
-      faceList[i].v3 = iz - 1;
-    }
-  fclose(fp);
+	// Read the faces
+	for(i = 0;i < faces;i++) {
+		fscanf(fp,"%c %d %d %d\n",&letter,&ix,&iy,&iz);
+		faceList[i].v1 = ix - 1;
+		faceList[i].v2 = iy - 1;
+		faceList[i].v3 = iz - 1;
+	}
+
+	fclose(fp);
 
 
-  // The part below calculates the normals of each vertex
-  normCount = (int *)malloc(sizeof(int)*verts);
-  for (i = 0;i < verts;i++)
-    {
-      normList[i].x = normList[i].y = normList[i].z = 0.0;
-      normCount[i] = 0;
-    }
+	// The part below calculates the normals of each vertex
+	normCount = (int *)malloc(sizeof(int)*verts);
+	for (i = 0;i < verts;i++) {
+		normList[i].x = normList[i].y = normList[i].z = 0.0;
+		normCount[i] = 0;
+	}
 
-  for(i = 0;i < faces;i++)
-    {
-      v1.x = vertList[faceList[i].v2].x - vertList[faceList[i].v1].x;
-      v1.y = vertList[faceList[i].v2].y - vertList[faceList[i].v1].y;
-      v1.z = vertList[faceList[i].v2].z - vertList[faceList[i].v1].z;
-      v2.x = vertList[faceList[i].v3].x - vertList[faceList[i].v2].x;
-      v2.y = vertList[faceList[i].v3].y - vertList[faceList[i].v2].y;
-      v2.z = vertList[faceList[i].v3].z - vertList[faceList[i].v2].z;
+	for(i = 0;i < faces;i++) {
+		v1.x = vertList[faceList[i].v2].x - vertList[faceList[i].v1].x;
+		v1.y = vertList[faceList[i].v2].y - vertList[faceList[i].v1].y;
+		v1.z = vertList[faceList[i].v2].z - vertList[faceList[i].v1].z;
+		v2.x = vertList[faceList[i].v3].x - vertList[faceList[i].v2].x;
+		v2.y = vertList[faceList[i].v3].y - vertList[faceList[i].v2].y;
+		v2.z = vertList[faceList[i].v3].z - vertList[faceList[i].v2].z;
 
-      crossP.x = v1.y*v2.z - v1.z*v2.y;
-      crossP.y = v1.z*v2.x - v1.x*v2.z;
-      crossP.z = v1.x*v2.y - v1.y*v2.x;
+		crossP.x = v1.y*v2.z - v1.z*v2.y;
+		crossP.y = v1.z*v2.x - v1.x*v2.z;
+		crossP.z = v1.x*v2.y - v1.y*v2.x;
 
-      len = sqrt(crossP.x*crossP.x + crossP.y*crossP.y + crossP.z*crossP.z);
+		len = sqrt(crossP.x*crossP.x + crossP.y*crossP.y + crossP.z*crossP.z);
 
-      crossP.x = -crossP.x/len;
-      crossP.y = -crossP.y/len;
-      crossP.z = -crossP.z/len;
+		crossP.x = -crossP.x/len;
+		crossP.y = -crossP.y/len;
+		crossP.z = -crossP.z/len;
 
-      normList[faceList[i].v1].x = normList[faceList[i].v1].x + crossP.x;
-      normList[faceList[i].v1].y = normList[faceList[i].v1].y + crossP.y;
-      normList[faceList[i].v1].z = normList[faceList[i].v1].z + crossP.z;
-      normList[faceList[i].v2].x = normList[faceList[i].v2].x + crossP.x;
-      normList[faceList[i].v2].y = normList[faceList[i].v2].y + crossP.y;
-      normList[faceList[i].v2].z = normList[faceList[i].v2].z + crossP.z;
-      normList[faceList[i].v3].x = normList[faceList[i].v3].x + crossP.x;
-      normList[faceList[i].v3].y = normList[faceList[i].v3].y + crossP.y;
-      normList[faceList[i].v3].z = normList[faceList[i].v3].z + crossP.z;
-      normCount[faceList[i].v1]++;
-      normCount[faceList[i].v2]++;
-      normCount[faceList[i].v3]++;
-    }
-  for (i = 0;i < verts;i++)
-    {
-      normList[i].x = (float)sign*normList[i].x / (float)normCount[i];
-      normList[i].y = (float)sign*normList[i].y / (float)normCount[i];
-      normList[i].z = (float)sign*normList[i].z / (float)normCount[i];
-    }
+		normList[faceList[i].v1].x = normList[faceList[i].v1].x + crossP.x;
+		normList[faceList[i].v1].y = normList[faceList[i].v1].y + crossP.y;
+		normList[faceList[i].v1].z = normList[faceList[i].v1].z + crossP.z;
+		normList[faceList[i].v2].x = normList[faceList[i].v2].x + crossP.x;
+		normList[faceList[i].v2].y = normList[faceList[i].v2].y + crossP.y;
+		normList[faceList[i].v2].z = normList[faceList[i].v2].z + crossP.z;
+		normList[faceList[i].v3].x = normList[faceList[i].v3].x + crossP.x;
+		normList[faceList[i].v3].y = normList[faceList[i].v3].y + crossP.y;
+		normList[faceList[i].v3].z = normList[faceList[i].v3].z + crossP.z;
+		normCount[faceList[i].v1]++;
+		normCount[faceList[i].v2]++;
+		normCount[faceList[i].v3]++;
+	}
 
+	for (i = 0;i < verts;i++) {
+		normList[i].x = (float)sign*normList[i].x / (float)normCount[i];
+		normList[i].y = (float)sign*normList[i].y / (float)normCount[i];
+		normList[i].z = (float)sign*normList[i].z / (float)normCount[i];
+	}
 }
 
 //void drawRect(double x, double y, double w, double h)
@@ -334,6 +326,7 @@ void redraw() {
 			Vector3* origin = new Vector3(x, y, 0.0);
 			Vector3* direction = new Vector3(0.0, 0.0, -1.0);
 			Ray* ray = new Ray(origin, direction);
+
 			shootRay(ray, 5, 0);
 			fb->SetPixel(i, j, ray->color, 0);
 
@@ -344,9 +337,7 @@ void redraw() {
 	}
 }
 
-// TODO clean up objects (delete-a-thon)
 bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
-	// if depth of trace > 0
 	if (depth < 1) {
 		return false;
 	}
@@ -359,11 +350,12 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 		DisplayObject* currentObj = i < spheres ? &sphereObjects[i] : &polygonObjects[i - spheres];
 		Vector3* curIntersect = new Vector3();
 		float dist = 0;
-
 		if (currentObj->intersects(ray, curIntersect, dist) && dist > 0.001 && dist < lowestDist) {
 			lowestDist = dist;
+
 			delete obj;
 			obj = currentObj;
+
 			delete intersect;
 			intersect = curIntersect;
 		} else {
@@ -375,10 +367,8 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 		return false;
 	}
 
-	// get normal at intersection point (DisplayObject.normalAtPoint())
+	// Calculate local intensity (I_local)
 	Vector3* norm = obj->normalAtPoint(intersect);
-
-	// calculate local intensity (I_local)
 	Vector3 V = *ray->direction * -1.0;
 	Color* localIntensity = obj->calculateIntensityAtPoint(intersect, &V, norm, lighting, lights);
 	Color* totalColor = new Color(localIntensity);
@@ -386,11 +376,9 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 
 	// if object is a reflecting object
 	if (obj->material->k_reflective > 0) {
-
 		// calculate reflection vector and include in new ray structure
 		Vector3 reflection = *ray->direction - (*norm * (2 * ray->direction->dot(norm)));
 		reflection = reflection / reflection.magnitude();
-
 		Ray* reflectedRay = new Ray(intersect, &reflection);
 
 		// if reflected ray intersects an object
@@ -398,6 +386,8 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 			// combine colors (k_rg I) with I_local
 			totalColor = &((*reflectedRay->color * obj->material->k_reflective) + *totalColor);
 		}
+
+		delete reflectedRay;
 	}
 
 	// if object is a refracting object
@@ -410,8 +400,6 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 		if (ray->direction->dot(norm) < 0) {
 			// accumulate the refractive index
 			refIndex = 1 / obj->material->refraction_index;
-
-			// increment number of objects that the ray is currently inside
 			objsInside = objectsRayIsInside + 1;
 
 			// calculate refraction vector and include in refracted ray structure
@@ -440,6 +428,8 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 			totalColor = new Color((*refractedRay->color * obj->material->k_reflective) + *totalColor);
 			delete temp;
 		}
+
+		delete refractedRay;
 	}
 
 	ray->color = totalColor;
