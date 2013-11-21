@@ -1,3 +1,8 @@
+/* Wes Rupert - wesrupert@outlook.com (wkr3)  *
+ * Josh Braun - jxb532@case.edu (jxb532)      *
+ * Case Western Reserve University - EECS 366 *
+ * 11/21/2013 - Assignment 7                  */
+
 #include "primitives.h"
 
 void BresenhamLine(FrameBuffer* fb, int x_1, int y_1, int x_2, int y_2, Color c)

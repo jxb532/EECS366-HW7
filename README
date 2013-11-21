@@ -1,0 +1,20 @@
+/* Wes Rupert - wesrupert@outlook.com (wkr3)  *
+ * Josh Braun - jxb532@case.edu (jxb532)      *
+ * Case Western Reserve University - EECS 366 *
+ * 11/21/2013 - Assignment 7                  */
+ 
+ To change the parameters of the ray tracer, use the two #define statements at the top of main.cpp
+ 
+ #define LAYOUT_FILE
+	Tells the ray tracer what layout file to load.
+	Options are:
+		"samples/redsphere.rtl" -> a single red sphere, loads quickly
+		"samples/red_sphere_and_blue_sphere.rtl" -> two spheres, loads quickly and shows reflection capabilities
+		"samples/red_sphere_and_teapot.rtl" -> loads very slowly, but will display eventually. Use to confirm the ability to display polygons.
+		
+#define RAY_DEPTH
+	Tells the ray tracer how many recursive steps should be taken for each ray
+	NOTE: This ray tracer is very slow. Increasing this number for a scene with polygons will cause BIG delays while rendering.
+	Making this large in a scene with only spheres won't be nearly as slow.
+	
+Because the ray tracer is so slow, the console window will print out the current progress as a helpful guide.

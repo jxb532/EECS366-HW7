@@ -1,3 +1,8 @@
+/* Wes Rupert - wesrupert@outlook.com (wkr3)  *
+ * Josh Braun - jxb532@case.edu (jxb532)      *
+ * Case Western Reserve University - EECS 366 *
+ * 11/21/2013 - Assignment 7                  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "glut.h"
@@ -23,8 +28,8 @@
 #define XY_STEP 1
 #define SLICES 100
 #define STACKS 100
-#define LAYOUT_FILE "samples/red_sphere_and_teapot.rtl"
-#define RAY_DEPTH 1
+#define LAYOUT_FILE "samples/red_sphere_and_blue_sphere.rtl"
+#define RAY_DEPTH 2
 
 using namespace std;
 
@@ -406,10 +411,9 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 		DisplayObject* currentObj = i < spheres ? dynamic_cast<DisplayObject*>(sphereObjects[i]) : dynamic_cast<DisplayObject*>(polygonObjects[i - spheres]);
 		Vector3* curIntersect = new Vector3();
 		float dist = 0;
-		if (currentObj->intersects(ray, curIntersect, dist) && dist > 0.00001 && dist < lowestDist) {
+		if (currentObj->intersects(ray, curIntersect, dist) && dist > 0.001 && dist < lowestDist) {
 			lowestDist = dist;
-			// TODO find out what was breaking this
-			//delete obj;
+
 			obj = currentObj;
 
 			delete intersect;
@@ -426,12 +430,13 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 	// Calculate local intensity (I_local)
 	Vector3* norm = obj->normalAtPoint(intersect);
 	Vector3 V = *ray->direction * -1.0;
-	Color* localIntensity = obj->calculateIntensityAtPoint(intersect, &V, norm, lighting, lights);
+	//Color* localIntensity = obj->calculateIntensityAtPoint(intersect, &V, norm, lighting, lights);
+	Color* localIntensity = objectsRayIsInside == 0 ? obj->calculateIntensityAtPoint(intersect, &V, norm, lighting, lights) : new Color(0,0,0);
 	Color* totalColor = new Color(localIntensity);
 	delete localIntensity, norm;
 
 	// if object is a reflecting object
-	if (obj->material->k_reflective > 0 /*&& objectsRayIsInside == 0*/) {
+	if (obj->material->k_reflective > 0) {
 		// calculate reflection vector and include in new ray structure
 		Vector3 reflection = *ray->direction - (*norm * (2 * ray->direction->dot(norm)));
 		reflection.normalize();
@@ -448,42 +453,34 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 
 	// if object is a refracting object
 	if (obj->material->k_refractive > 0) {
-		Vector3 refractionVector;
 		float refIndex = 0;
 		int objsInside = 0;
+		float cosTheta = ray->direction->dot(norm) * -1.0;
+		float cosSqTheta = 1.0 - refIndex * refIndex * (1.0 - (cosTheta * cosTheta));
 
 		// if ray is entering object
 		if (ray->direction->dot(norm) <= 0) {
 			// accumulate the refractive index
 			refIndex = 1.0 / obj->material->refraction_index;
 			objsInside = objectsRayIsInside + 1;
-
-			// calculate refraction vector and include in refracted ray structure
-			float cosTheta = ray->direction->dot(norm) * -1.0;
-			float sinSqTheta = refIndex * refIndex * (1 - (cosTheta * cosTheta));
-			refractionVector = (*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta)));
 		} else {
 			// de-accumulate refractive index
 			refIndex = obj->material->refraction_index;
 
 			// decrement number of objects that the ray is currently inside
 			objsInside = objectsRayIsInside - 1;
-
-			// calculate refraction vector and include in refracted ray structure
-			float cosTheta = ray->direction->dot(norm) * -1.0;
-			float sinSqTheta = refIndex * refIndex * (1 - (cosTheta * cosTheta));
-			refractionVector = (*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(1 - sinSqTheta)));
 		}
+		
+		// calculate refraction vector and include in refracted ray structure
+		Vector3 refractionVector = (*ray->direction * refIndex) + (*norm * (refIndex * cosTheta - sqrtf(cosSqTheta)));
 
 		Ray* refractedRay = new Ray(intersect, &refractionVector);
 
 		// if refracted ray intersects an object
 		if (shootRay(refractedRay, depth - 1, objsInside)) {
 			// combine colors (k_tg I) with I_local
-			Color* temp = totalColor;
-			totalColor = new Color((*refractedRay->color * obj->material->k_reflective) + *totalColor);
-			// TODO reinstate this, it was killing things
-			//delete temp;
+			//Color* temp = totalColor;
+			totalColor = new Color((*refractedRay->color * obj->material->k_refractive) + *totalColor);
 		}
 
 		delete refractedRay;

@@ -1,7 +1,14 @@
+/* Wes Rupert - wesrupert@outlook.com (wkr3)  *
+ * Josh Braun - jxb532@case.edu (jxb532)      *
+ * Case Western Reserve University - EECS 366 *
+ * 11/21/2013 - Assignment 7                  */
+
 #include <stdlib.h>
 #include <math.h>
 #include <vector>
 #include "DisplayObject.h";
+
+#define EPSILON 1e-6
 
 DisplayObject::~DisplayObject() {
 	// Nothing to delete.
@@ -11,20 +18,22 @@ DisplayObject::~DisplayObject() {
 Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, vector<Light*> lights, int numLights) {
 
 	float temp;
+	float ambientLight[] = {0.3, 0.3, 0.3};
 	Vector3 color (0, 0, 0);
 	for (int i = 0; i < numLights; i++) {
 		//if (lights[i]->type == Light::Point) {
 			Vector3 lightPos (lights[i]->position);
 
 			Vector3 L = (lightPos - *point); L.normalize();
-			Vector3 R = ((*N * 2.0) * N->dot(L)) - L; R.normalize();
+			Vector3 R = ((*N * (2.0 * L.dot(N)))) - L; R.normalize();
 			//Vector3 H = L + *V; H.normalize();
 		  
-			Vector3 Ia (material->ambient[0] * lights[i]->color[0],
-						material->ambient[1] * lights[i]->color[1],
-						material->ambient[2] * lights[i]->color[2]);
+			Vector3 Ia (material->ambient[0] * ambientLight[0],
+						material->ambient[1] * ambientLight[1],
+						material->ambient[2] * ambientLight[2]);
 
-			temp = N->dot(L);
+			temp = L.dot(N);
+			temp = temp < 0 ? 0 : temp;
 			Vector3 Id (material->diffuse[0] * lights[i]->color[0] * temp,
 						material->diffuse[1] * lights[i]->color[1] * temp,
 						material->diffuse[2] * lights[i]->color[2] * temp);
@@ -32,10 +41,15 @@ Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vect
 			Id[1] = (Id[1] > 0) ? (Id[1] < 1) ? Id[1] : 1 : 0;
 			Id[2] = (Id[2] > 0) ? (Id[2] < 1) ? Id[2] : 1 : 0;
 
-			temp = powf(R.dot(V), material->specular_exponent);
+			temp = R.dot(V);
+			temp = temp < 0 ? 0 : temp;
+			temp = powf(temp, material->specular_exponent);
 			Vector3 Is (material->specular[0] * lights[i]->color[0] * temp,
 						material->specular[1] * lights[i]->color[1] * temp,
 						material->specular[2] * lights[i]->color[2] * temp);
+			Is[0] = (Is[0] > 0) ? (Is[0] < 1) ? Is[0] : 1 : 0;
+			Is[1] = (Is[1] > 0) ? (Is[1] < 1) ? Is[1] : 1 : 0;
+			Is[2] = (Is[2] > 0) ? (Is[2] < 1) ? Is[2] : 1 : 0;
 
 			color = color + Ia + Id + Is;
 		//} else if (lights[i]->type == Light::Directional) {
@@ -142,7 +156,7 @@ Polygon::~Polygon() {
 bool Polygon::intersects(Ray* _ray, Vector3* intersect, float &dist) {
 	Vector3 n = (*v2 - *v1).cross(&(*v3 - *v1)); n.normalize();
 
-	if (n.dot(_ray->direction) == 0) return false;
+	if (n.dot(_ray->direction) < EPSILON && n.dot(_ray->direction) > -EPSILON) return false;
 	float t = -(n.dot(_ray->origin) - n.dot(v1)) / n.dot(_ray->direction);
 	if (t < 0) return false;
 
@@ -159,21 +173,52 @@ bool Polygon::intersects(Ray* _ray, Vector3* intersect, float &dist) {
 	return (n.dot(&(edge0.cross(&c0))) > 0 &&
 		n.dot(&(edge1.cross(&c1))) > 0 &&
 		n.dot(&(edge2.cross(&c2))) > 0);
+
+	//Vector3 e1 = *v2 - *v1;
+ //   Vector3 e2 = *v3 - *v1;
+	//Vector3 pvec = _ray->direction->cross(e2);
+ //   float det = e1.dot(pvec);
+	//// ray and triangle are parallel if det is close to 0
+	//if (det > -EPSILON && det < EPSILON) {
+	//	return false;
+	//}
+
+	//// prepare to compute u
+	//Vector3 tvec = *_ray->origin - *v1;
+ //   u = tvec.dot(pvec); // NO MULT BY INV_DET
+ //   if (u < 0 || u > det) { // TEST BOUNDS USING DET
+ //       return 0;
+	//}
+ //   // prepare to compute v
+ //   Vector3 qvec = tvec.cross(e1);
+	//v = _ray->direction->dot(qvec); // NO MULT BY INV_DET
+ //   if (v < 0 || v > det || u + v > det) { // TEST BOUNDS USING DET
+ //       return 0;
+	//}
+ //   // ray intersects triangle, compute t and NORMALIZE u and v
+ //   float invDet = 1 / det;
+ //   int t = e2.dot(qvec) * invDet;
+	////*intersect = *_ray->origin + (*_ray->direction * t);
+	//dist = t;
+ //   u *= invDet;
+ //   v *= invDet;
+ //   return true;
+    
 }
 
 float polygonArea(Vector3* a, Vector3* b, Vector3* c) {
 	Vector3 ab = *b - *a;
 	Vector3 ac = *c - *a;
-	return ab.cross(&ac).magnitude() / 2;
+	return ab.cross(ac).magnitude() / 2.0;
 }
 
 Vector3* Polygon::normalAtPoint(Vector3* point) {
-	float a1 = polygonArea(point, this->v2, this->v3);
-	float a2 = polygonArea(point, this->v1, this->v3);
-	float a3 = polygonArea(point, this->v1, this->v2);
+	float a1 = polygonArea(point, v2, v3);
+	float a2 = polygonArea(point, v1, v3);
+	float a3 = polygonArea(point, v1, v2);
 	float a = a1 + a2 + a3;
-	Vector3* normal = &((*this->n1 * (a1/a)) + (*this->n2 * (a2/a)) + (*this->n3 * (a3/a)));
-	normal = new Vector3(*normal / normal->magnitude());
-
-	return normal;
+	float test = polygonArea(v1, v2, v3);
+	Vector3 n = (*n1 * (a1/a)) + (*n2 * (a2/a)) + (*n3 * (a3/a));
+	//Vector3 n = (*n1 * u) + (*n2 * v) + (*n3 * (1 - (u + v)));
+	return new Vector3(n / n.magnitude());
 }
