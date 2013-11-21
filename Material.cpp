@@ -1,5 +1,26 @@
 #include "Material.h"
 
+Material::Material() {
+	ambient[0] = 0;
+	ambient[1] = 0;
+	ambient[2] = 0;
+
+	diffuse[0] = 0;
+	diffuse[1] = 0;
+	diffuse[2] = 0;
+
+	specular[0] = 0;
+	specular[1] = 0;
+	specular[2] = 0;
+
+	k_ambient = 0;
+	k_diffuse = 0;
+	k_specular = 0;
+	specular_exponent = 0;
+	refraction_index = 0;
+	k_reflective = 0;
+	k_refractive = 0;
+}
 
 Material::Material( float* _ambient, float* _diffuse, float* _specular, float _k_ambient, float _k_diffuse, float _k_specular, float _specular_exponent, float _refraction_index, float _k_reflective, float _k_refractive)
 {

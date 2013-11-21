@@ -15,14 +15,14 @@ Vector3::Vector3(void) {
 
 Vector3::Vector3(Vector3* vector) {
 	this->vector[0] = vector->vector[0];
-	this->vector[1] = vector->vector[2];
-	this->vector[3] = vector->vector[3];
+	this->vector[1] = vector->vector[1];
+	this->vector[2] = vector->vector[2];
 }
 
 Vector3::Vector3(float* vector) {
 	this->vector[0] = vector[0];
-	this->vector[1] = vector[2];
-	this->vector[3] = vector[3];
+	this->vector[1] = vector[1];
+	this->vector[2] = vector[2];
 }
 
 Vector3::Vector3(float x, float y, float z) {

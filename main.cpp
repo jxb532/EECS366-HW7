@@ -23,7 +23,7 @@
 #define XY_STEP 1
 #define SLICES 100
 #define STACKS 100
-#define LAYOUT_FILE "samples/red_sphere_and_blue_sphere.rtl"
+#define LAYOUT_FILE "samples/red_sphere_and_teapot.rtl"
 
 using namespace std;
 
@@ -43,6 +43,9 @@ void redraw();
 bool parseLayoutFile(char* path);
 bool shootRay(Ray *ray);
 bool shootRay(Ray *ray, int depth, int objectsRayIsInside);
+void updateBoundingBox(Vector3* v);
+void finishBoundingBox();
+bool first = true;
 
 typedef struct _faceStruct {
   int v1,v2,v3;
@@ -59,6 +62,9 @@ DisplayObject *objects;
 vector<Sphere*> sphereObjects;
 vector<Polygon*> polygonObjects;
 vector<Light*> lighting;
+vector<Polygon*> boundingBoxPolygons;
+Vector3** boundingBox = new Vector3*[8];
+float MinimumX, MaximumX, MinimumY, MaximumY, MinimumZ, MaximumZ;
 
 // The mesh reader itself
 // It can read *very* simple obj files
@@ -282,9 +288,32 @@ void	keyboard(unsigned char key, int x, int y)
     glutPostRedisplay();
 }
 
+void test() {
+	Vector3* v1 = new Vector3(1, 1, 0);
+	Vector3* v2 = new Vector3(-1, 1, 0);
+	Vector3* v3 = new Vector3(0, -1, 0);
+	Polygon* polygon = new Polygon(v1, v2, v3, v1, v1, v1, new Material());
+
+	float center[] = {0.0, 0.0, 0.0};
+	Sphere* sphere = new Sphere(center, 1.0, new Material());
+
+	//Vector3* origin = new Vector3(0, 0, 1);
+	//Vector3* direction = new Vector3(0, 0, -1);
+	//Ray* ray = new Ray(origin, direction);
+
+	Vector3* origin = new Vector3(0.5, 0, 3);
+	Vector3* direction = new Vector3(0, 0, -1);
+	Ray* ray = new Ray(origin, direction);
+
+	Vector3* curIntersect = new Vector3();
+	float dist = 0;
+	//polygon->intersects(ray, curIntersect, dist);
+	sphere->intersects(ray, curIntersect, dist);
+}
 
 int main(int argc, char* argv[])
 {    
+	//test();
 
 	fb = new FrameBuffer(INITIAL_RES, INITIAL_RES);
 
@@ -321,7 +350,11 @@ int main(int argc, char* argv[])
 
 void redraw() {
 	for (int i = 0; i < fb->GetWidth(); i++) {
+		if (i % 50 == 0) {
+			printf("Calculating pixel column %d out of %d\n", i, fb->GetWidth());
+		}
 		for (int j = 0; j < fb->GetHeight(); j++) {
+
 			float x = (((float)imagePlaneXY * 2) / (float)fb->GetWidth()) * (float)i - (float)imagePlaneXY;
 			float y = (((float)imagePlaneXY * 2) / (float)fb->GetHeight()) * (float)j - (float)imagePlaneXY;
 
@@ -329,7 +362,7 @@ void redraw() {
 			Vector3* direction = new Vector3(0.0, 0.0, -1.0);
 			Ray* ray = new Ray(origin, direction);
 
-			shootRay(ray, 5, 0);
+			shootRay(ray, 3, 0);
 			fb->SetPixel(i, j, ray->color, 0);
 
 			delete origin, direction, ray;
@@ -347,12 +380,31 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 	float lowestDist = FLT_MAX;
 	DisplayObject* obj = NULL;
 	Vector3* intersect = NULL;
+
+	bool hitsBoundingBox = totalFaces == 0;
+
+	if (!hitsBoundingBox) {
+		float dist = 0;
+		Vector3* curIntersect = new Vector3();
+		for (int i = 0; i < 12; i++) {
+			Polygon* currentObj = boundingBoxPolygons[i];
+			if (currentObj->intersects(ray, curIntersect, dist)) {
+				hitsBoundingBox = true;
+			}
+		}
+		delete curIntersect;
+	}
 	
 	for (int i = 0; i < spheres + totalFaces; i++) {
+
+		if (i >= spheres && !hitsBoundingBox) {
+			break;
+		}
+
 		DisplayObject* currentObj = i < spheres ? dynamic_cast<DisplayObject*>(sphereObjects[i]) : dynamic_cast<DisplayObject*>(polygonObjects[i - spheres]);
 		Vector3* curIntersect = new Vector3();
 		float dist = 0;
-		if (currentObj->intersects(ray, curIntersect, dist) && dist > 0.001 && dist < lowestDist) {
+		if (currentObj->intersects(ray, curIntersect, dist) && dist > 0.00001 && dist < lowestDist) {
 			lowestDist = dist;
 			// TODO find out what was breaking this
 			//delete obj;
@@ -377,10 +429,10 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 	delete localIntensity, norm;
 
 	// if object is a reflecting object
-	if (obj->material->k_reflective > 0) {
+	if (obj->material->k_reflective > 0 && objectsRayIsInside == 0) {
 		// calculate reflection vector and include in new ray structure
 		Vector3 reflection = *ray->direction - (*norm * (2 * ray->direction->dot(norm)));
-		reflection = reflection / reflection.magnitude();
+		reflection.normalize();
 		Ray* reflectedRay = new Ray(intersect, &reflection);
 
 		// if reflected ray intersects an object
@@ -395,13 +447,13 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 	// if object is a refracting object
 	if (obj->material->k_refractive > 0) {
 		Vector3 refractionVector;
-		int refIndex = 0;
+		float refIndex = 0;
 		int objsInside = 0;
 
 		// if ray is entering object
-		if (ray->direction->dot(norm) < 0) {
+		if (ray->direction->dot(norm) <= 0) {
 			// accumulate the refractive index
-			refIndex = 1 / obj->material->refraction_index;
+			refIndex = 1.0 / obj->material->refraction_index;
 			objsInside = objectsRayIsInside + 1;
 
 			// calculate refraction vector and include in refracted ray structure
@@ -515,6 +567,9 @@ void initObjectsAndLights() {
 
 			// Save the calculated polygon.
 			//new (&polygonObjects[index++]) Polygon(&vertex1, &vertex2, &vertex3, &normal1, &normal2, &normal3, mat);
+			updateBoundingBox(&vertex1);
+			updateBoundingBox(&vertex2);
+			updateBoundingBox(&vertex3);
 			Polygon* poly = new Polygon(&vertex1, &vertex2, &vertex3, &normal1, &normal2, &normal3, mat);
 			polygonObjects.push_back(poly);
 		}
@@ -522,6 +577,57 @@ void initObjectsAndLights() {
 		delete translate, tr;
 		translate = NULL; tr = NULL;
 	}
+
+	finishBoundingBox();
+}
+
+void updateBoundingBox(Vector3* v) {
+	float a = v->vector[0];
+	float b = v->vector[1];
+	float c = v->vector[2];
+
+	if (first) {
+		MaximumX = MinimumX = a;
+		MaximumY = MinimumY = b;
+		MaximumZ = MinimumZ = c;
+		first = false;
+	}
+
+	MaximumX = a > MaximumX ? a : MaximumX;
+	MinimumX = a < MinimumX ? a : MinimumX;
+	MaximumY = b > MaximumY ? b : MaximumY;
+	MinimumY = b < MinimumY ? b : MinimumY;
+	MaximumZ = c > MaximumZ ? c : MaximumZ;
+	MinimumZ = c < MinimumZ ? c : MinimumZ;
+}
+
+void finishBoundingBox() {
+	
+	boundingBox[0] = new Vector3(MaximumX, MaximumY, MaximumZ);
+	boundingBox[1] = new Vector3(MinimumX, MaximumY, MaximumZ);
+	boundingBox[2] = new Vector3(MinimumX, MinimumY, MaximumZ);
+	boundingBox[3] = new Vector3(MaximumX, MinimumY, MaximumZ);
+	boundingBox[4] = new Vector3(MaximumX, MaximumY, MinimumZ);
+	boundingBox[5] = new Vector3(MinimumX, MaximumY, MinimumZ);
+	boundingBox[6] = new Vector3(MinimumX, MinimumY, MinimumZ);
+	boundingBox[7] = new Vector3(MaximumX, MinimumY, MinimumZ);
+
+	Vector3* emptyPtr = new Vector3();
+	Material* mat = new Material();
+					
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[0], boundingBox[1], boundingBox[2], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[0], boundingBox[2], boundingBox[3], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[5], boundingBox[4], boundingBox[7], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[5], boundingBox[7], boundingBox[6], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[4], boundingBox[0], boundingBox[3], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[4], boundingBox[3], boundingBox[7], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[6], boundingBox[2], boundingBox[1], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[6], boundingBox[1], boundingBox[5], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[5], boundingBox[1], boundingBox[0], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[5], boundingBox[0], boundingBox[4], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[7], boundingBox[3], boundingBox[2], emptyPtr, emptyPtr, emptyPtr, mat));
+	boundingBoxPolygons.push_back(new Polygon(boundingBox[7], boundingBox[2], boundingBox[6], emptyPtr, emptyPtr, emptyPtr, mat));
+	delete emptyPtr;
 }
 
 bool parseLayoutFile(char* path) {

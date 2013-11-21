@@ -9,17 +9,16 @@ DisplayObject::~DisplayObject() {
 
 
 Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, vector<Light*> lights, int numLights) {
-	// TODO: normalize things
 
 	float temp;
 	Vector3 color (0, 0, 0);
 	for (int i = 0; i < numLights; i++) {
-		if (lights[i]->type == Light::Point) {
+		//if (lights[i]->type == Light::Point) {
 			Vector3 lightPos (lights[i]->position);
 
 			Vector3 L = (lightPos - *point); L.normalize();
 			Vector3 R = ((*N * 2.0) * N->dot(L)) - L; R.normalize();
-			Vector3 H = L + *V; H.normalize();
+			//Vector3 H = L + *V; H.normalize();
 		  
 			Vector3 Ia (material->ambient[0] * lights[i]->color[0],
 						material->ambient[1] * lights[i]->color[1],
@@ -39,9 +38,9 @@ Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vect
 						material->specular[2] * lights[i]->color[2] * temp);
 
 			color = color + Ia + Id + Is;
-		} else if (lights[i]->type == Light::Directional) {
+		//} else if (lights[i]->type == Light::Directional) {
 			// TODO: Implement.
-		}
+		//}
 	}
 
 	return new Color(color[0], color[1], color[2]);
@@ -141,13 +140,13 @@ Polygon::~Polygon() {
 }
 
 bool Polygon::intersects(Ray* _ray, Vector3* intersect, float &dist) {
-	Vector3 n = (*n2 - *n1).cross(&(*n3 - *n1));
+	Vector3 n = (*v2 - *v1).cross(&(*v3 - *v1)); n.normalize();
 
 	if (n.dot(_ray->direction) == 0) return false;
-	float t = (n.dot(_ray->origin) + n.dot(n1)) / n.dot(_ray->direction);
+	float t = -(n.dot(_ray->origin) + n.dot(v1)) / n.dot(_ray->direction);
 	if (t < 0) return false;
 
-	intersect = &(*_ray->origin + (*_ray->direction * t));
+	*intersect = *_ray->origin + (*_ray->direction * t);
 	dist = (*intersect - *_ray->origin).magnitude();
 
 	Vector3 edge0 = *v2 - *v1;
