@@ -24,6 +24,7 @@
 #define SLICES 100
 #define STACKS 100
 #define LAYOUT_FILE "samples/red_sphere_and_teapot.rtl"
+#define RAY_DEPTH 1
 
 using namespace std;
 
@@ -362,7 +363,7 @@ void redraw() {
 			Vector3* direction = new Vector3(0.0, 0.0, -1.0);
 			Ray* ray = new Ray(origin, direction);
 
-			shootRay(ray, 3, 0);
+			shootRay(ray, RAY_DEPTH, 0);
 			fb->SetPixel(i, j, ray->color, 0);
 
 			delete origin, direction, ray;
@@ -430,7 +431,7 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 	delete localIntensity, norm;
 
 	// if object is a reflecting object
-	if (obj->material->k_reflective > 0 && objectsRayIsInside == 0) {
+	if (obj->material->k_reflective > 0 /*&& objectsRayIsInside == 0*/) {
 		// calculate reflection vector and include in new ray structure
 		Vector3 reflection = *ray->direction - (*norm * (2 * ray->direction->dot(norm)));
 		reflection.normalize();
