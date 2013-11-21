@@ -390,6 +390,7 @@ bool shootRay(Ray *ray, int depth = 5, int objectsRayIsInside = 0) {
 			Polygon* currentObj = boundingBoxPolygons[i];
 			if (currentObj->intersects(ray, curIntersect, dist)) {
 				hitsBoundingBox = true;
+				break;
 			}
 		}
 		delete curIntersect;
