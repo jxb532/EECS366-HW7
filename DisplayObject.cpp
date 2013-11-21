@@ -143,7 +143,7 @@ bool Polygon::intersects(Ray* _ray, Vector3* intersect, float &dist) {
 	Vector3 n = (*v2 - *v1).cross(&(*v3 - *v1)); n.normalize();
 
 	if (n.dot(_ray->direction) == 0) return false;
-	float t = -(n.dot(_ray->origin) + n.dot(v1)) / n.dot(_ray->direction);
+	float t = (n.dot(_ray->origin) - n.dot(v1)) / n.dot(_ray->direction);
 	if (t < 0) return false;
 
 	*intersect = *_ray->origin + (*_ray->direction * t);
