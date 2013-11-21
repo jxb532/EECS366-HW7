@@ -364,7 +364,8 @@ bool shootRay(Ray *ray, int depth, int objectsRayIsInside) {
 
 		if (currentObj->intersects(ray, curIntersect, dist) && dist > 0.001 && dist < lowestDist) {
 			lowestDist = dist;
-			delete obj;
+			// TODO find out what was breaking this
+			//delete obj;
 			obj = currentObj;
 			delete intersect;
 			intersect = curIntersect;
@@ -440,7 +441,8 @@ bool shootRay(Ray *ray, int depth, int objectsRayIsInside) {
 			// combine colors (k_tg I) with I_local
 			Color* temp = totalColor;
 			totalColor = new Color((*refractedRay->color * obj->material->k_reflective) + *totalColor);
-			delete temp;
+			// TODO reinstate this, it was killing things
+			//delete temp;
 		}
 	}
 
