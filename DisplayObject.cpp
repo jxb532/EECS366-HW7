@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
+#include <vector>
 #include "DisplayObject.h";
 
 DisplayObject::~DisplayObject() {
@@ -7,38 +8,38 @@ DisplayObject::~DisplayObject() {
 };
 
 
-Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, Light* lights, int numLights) {
+Color* DisplayObject::calculateIntensityAtPoint(Vector3* point, Vector3* V, Vector3* N, vector<Light*> lights, int numLights) {
 	// TODO: normalize things
 
 	float temp;
 	Vector3 color (0, 0, 0);
 	for (int i = 0; i < numLights; i++) {
-		if (lights[i].type == Light::Point) {
-			Vector3 lightPos (lights[i].position);
+		if (lights[i]->type == Light::Point) {
+			Vector3 lightPos (lights[i]->position);
 
 			Vector3 L = (lightPos - *point); L.normalize();
 			Vector3 R = ((*N * 2.0) * N->dot(L)) - L; R.normalize();
 			Vector3 H = L + *V; H.normalize();
 		  
-			Vector3 Ia (material->ambient[0] * lights[i].color[0],
-						material->ambient[1] * lights[i].color[1],
-						material->ambient[2] * lights[i].color[2]);
+			Vector3 Ia (material->ambient[0] * lights[i]->color[0],
+						material->ambient[1] * lights[i]->color[1],
+						material->ambient[2] * lights[i]->color[2]);
 
 			temp = N->dot(L);
-			Vector3 Id (material->diffuse[0] * lights[i].color[0] * temp,
-						material->diffuse[1] * lights[i].color[1] * temp,
-						material->diffuse[2] * lights[i].color[2] * temp);
+			Vector3 Id (material->diffuse[0] * lights[i]->color[0] * temp,
+						material->diffuse[1] * lights[i]->color[1] * temp,
+						material->diffuse[2] * lights[i]->color[2] * temp);
 			Id[0] = (Id[0] > 0) ? (Id[0] < 1) ? Id[0] : 1 : 0;
 			Id[1] = (Id[1] > 0) ? (Id[1] < 1) ? Id[1] : 1 : 0;
 			Id[2] = (Id[2] > 0) ? (Id[2] < 1) ? Id[2] : 1 : 0;
 
 			temp = powf(R.dot(V), material->specular_exponent);
-			Vector3 Is (material->specular[0] * lights[i].color[0] * temp,
-						material->specular[1] * lights[i].color[1] * temp,
-						material->specular[2] * lights[i].color[2] * temp);
+			Vector3 Is (material->specular[0] * lights[i]->color[0] * temp,
+						material->specular[1] * lights[i]->color[1] * temp,
+						material->specular[2] * lights[i]->color[2] * temp);
 
 			color = color + Ia + Id + Is;
-		} else if (lights[i].type == Light::Directional) {
+		} else if (lights[i]->type == Light::Directional) {
 			// TODO: Implement.
 		}
 	}
