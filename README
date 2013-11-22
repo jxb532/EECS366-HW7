@@ -18,3 +18,5 @@
 	Making this large in a scene with only spheres won't be nearly as slow.
 	
 Because the ray tracer is so slow, the console window will print out the current progress as a helpful guide.
+
+An image "teapot_compare2.PNG" is included to show the progress on the program made since 11/20/2013
